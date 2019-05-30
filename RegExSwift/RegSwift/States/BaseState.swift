@@ -17,6 +17,7 @@ enum StateType {
 protocol BaseState {
     var stateType: StateType { get }
     var outs: [BaseState]? { get set }
+    func copy() -> BaseState
 }
 
 class ValueState: BaseState {
@@ -35,11 +36,27 @@ class ValueState: BaseState {
                                                        canAcceptNil: acceptEmptyInput)
         }
     }
+    
+    private init(acceptanceChecker: AcceptanceChekcer) {
+        self.acceptanceChecker = acceptanceChecker
+    }
+    
+    func copy() -> BaseState {
+        let newValueState = ValueState(acceptanceChecker: self.acceptanceChecker)
+        newValueState.outs = self.outs
+        return newValueState as BaseState
+    }
 }
 
 class SplitState: BaseState {
     let stateType: StateType = .split
     var outs: [BaseState]?
+    
+    func copy() -> BaseState {
+        let newSplit = SplitState()
+        newSplit.outs = self.outs
+        return newSplit
+    }
 }
 
 //class SplitState: BaseState {
@@ -57,16 +74,18 @@ class AcceptState: BaseState {
     static let shared = AcceptState()
     let stateType: StateType = .accepted
     var outs: [BaseState]?
+    
+    func copy() -> BaseState {
+        return AcceptState.shared
+    }
 }
 
 class StateHelper {
     func createStates(from semanticUnits: [SemanticUnit]) throws {
-        
         var semanticUnitIte = semanticUnits.makeIterator()
         var stateStack: [BaseState] = []
         
         while let semanticUnit = semanticUnitIte.next() {
-            
             switch semanticUnit.semanticUnitType {
             case .functionalSymbol:
                 let functionalSemanticUnit = semanticUnit as! FunctionalSemantic
@@ -77,8 +96,8 @@ class StateHelper {
                     guard nextSemanticUnit.semanticUnitType != .functionalSymbol else {
                         throw RegExSwiftError("SyntaxError: | 右侧的内容非法")
                     }
-                    let nextState = try self.createState(fromNonFunctionalSemanticUnit: nextSemanticUnit)
                     
+                    let nextState = try self.createState(fromNonFunctionalSemanticUnit: nextSemanticUnit)
                     let splitState = SplitState()
                     splitState.outs = [previousState, nextState]
                     stateStack.append(splitState)
@@ -89,9 +108,15 @@ class StateHelper {
                     antiState.outs = [AcceptState.shared]
                     stateStack.append(antiState)
                 case .Plus:
-                    break
+                    guard var previousState = stateStack.popLast() else { throw RegExSwiftError("SyntaxError: | 的前面没有内容") }
+                    var sameState = previousState.copy()
+                    sameState.outs = [sameState, AcceptState.shared]
+                    previousState.outs = [sameState]
+                    stateStack.append(previousState)
                 case .Star:
-                    break
+                    guard var previousState = stateStack.popLast() else { throw RegExSwiftError("SyntaxError: | 的前面没有内容") }
+                    previousState.outs = [previousState, AcceptState.shared]
+                    stateStack.append(previousState)
                 }
             default:
                 let state = try self.createState(fromNonFunctionalSemanticUnit: semanticUnit)
