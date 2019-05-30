@@ -14,34 +14,38 @@ enum StateType {
     case accepted
 }
 
-protocol BaseState {
-    var stateType: StateType { get }
-    var outs: [BaseState]? { get set }
-    func copy() -> BaseState
+class BaseState {
+    let stateType: StateType
+    var outs: [BaseState]?
+    func copy() -> BaseState { fatalError("Implementation needed") }
+    
+    init(_ stateType: StateType) {
+        self.stateType = stateType
+    }
 }
 
 class ValueState: BaseState {
-    let stateType: StateType = .value
-    var outs: [BaseState]?
     let acceptanceChecker: AcceptanceChekcer
-    
-    init(acceptEmptyInput: Bool, isForExclude: Bool, characters:Set<Character>) {
+    convenience init(acceptEmptyInput: Bool, isForExclude: Bool, characters:Set<Character>) {
+        let acceptanceChecker: AcceptanceChekcer
         if isForExclude {
-            self.acceptanceChecker = AcceptanceChekcer(type: .exclude,
+            acceptanceChecker = AcceptanceChekcer(type: .exclude,
                                                        unacceptedCharacters: characters,
                                                        canAcceptNil: acceptEmptyInput)
         } else {
-            self.acceptanceChecker = AcceptanceChekcer(type: .include,
+            acceptanceChecker = AcceptanceChekcer(type: .include,
                                                        acceptedCharacters: characters,
                                                        canAcceptNil: acceptEmptyInput)
         }
+        self.init(acceptanceChecker: acceptanceChecker)
     }
     
     private init(acceptanceChecker: AcceptanceChekcer) {
         self.acceptanceChecker = acceptanceChecker
+        super.init(.value)
     }
     
-    func copy() -> BaseState {
+    override func copy() -> BaseState {
         let newValueState = ValueState(acceptanceChecker: self.acceptanceChecker)
         newValueState.outs = self.outs
         return newValueState as BaseState
@@ -49,10 +53,12 @@ class ValueState: BaseState {
 }
 
 class SplitState: BaseState {
-    let stateType: StateType = .split
-    var outs: [BaseState]?
     
-    func copy() -> BaseState {
+    convenience init() {
+        self.init(.split)
+    }
+    
+    override func copy() -> BaseState {
         let newSplit = SplitState()
         newSplit.outs = self.outs
         return newSplit
@@ -71,17 +77,15 @@ class SplitState: BaseState {
 //}
 
 class AcceptState: BaseState {
-    static let shared = AcceptState()
-    let stateType: StateType = .accepted
-    var outs: [BaseState]?
-    
-    func copy() -> BaseState {
+    static let shared = AcceptState(.accepted)
+    override func copy() -> BaseState {
         return AcceptState.shared
     }
 }
 
 class StateHelper {
-    func createStates(from semanticUnits: [SemanticUnit]) throws {
+    
+    func createStates(from semanticUnits: [SemanticUnit]) throws -> BaseState {
         var semanticUnitIte = semanticUnits.makeIterator()
         var stateStack: [BaseState] = []
         
@@ -108,13 +112,13 @@ class StateHelper {
                     antiState.outs = [AcceptState.shared]
                     stateStack.append(antiState)
                 case .Plus:
-                    guard var previousState = stateStack.popLast() else { throw RegExSwiftError("SyntaxError: | 的前面没有内容") }
-                    var sameState = previousState.copy()
+                    guard let previousState = stateStack.popLast() else { throw RegExSwiftError("SyntaxError: | 的前面没有内容") }
+                    let sameState = previousState.copy()
                     sameState.outs = [sameState, AcceptState.shared]
                     previousState.outs = [sameState]
                     stateStack.append(previousState)
                 case .Star:
-                    guard var previousState = stateStack.popLast() else { throw RegExSwiftError("SyntaxError: | 的前面没有内容") }
+                    guard let previousState = stateStack.popLast() else { throw RegExSwiftError("SyntaxError: | 的前面没有内容") }
                     previousState.outs = [previousState, AcceptState.shared]
                     stateStack.append(previousState)
                 }
@@ -123,6 +127,12 @@ class StateHelper {
                 stateStack.append(state)
             }
         }
+        
+        guard let retState = stateStack.last else {
+            throw RegExSwiftError("InternalError: There supposed to be at least one state in the stack")
+        }
+        
+        return  retState
     }
     
     func createState(fromNonFunctionalSemanticUnit semanticUnit: SemanticUnit) throws -> BaseState {
@@ -148,7 +158,9 @@ class StateHelper {
             classState.outs = [AcceptState.shared]
             return classState
         case .oneGroup:
-            throw RegExSwiftError("tmp")
+            let groupSemanticUnit = semanticUnit as! GroupExpressionSemantic
+            let stateFromGroup = try self.createStates(from: groupSemanticUnit.semanticUnits)
+            return stateFromGroup
         }
     }
     
