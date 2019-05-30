@@ -10,11 +10,13 @@ import Foundation
 
 enum StateType {
     case value
-    case accept
+    case split
+    case accepted
 }
 
 protocol BaseState {
     var stateType: StateType { get }
+    var outs: [BaseState]? { get set }
 }
 
 class ValueState: BaseState {
@@ -22,23 +24,22 @@ class ValueState: BaseState {
     var outs: [BaseState]?
     let acceptanceChecker: AcceptanceChekcer
     
-    init(acceptEmptyInput: Bool, acceptedCharacters:Set<Character>) {
-        self.acceptanceChecker = AcceptanceChekcer(type: .include,
-                                                   acceptedCharacters: acceptedCharacters,
-                                                   canAcceptNil: acceptEmptyInput)
+    init(acceptEmptyInput: Bool, isForExclude: Bool, characters:Set<Character>) {
+        if isForExclude {
+            self.acceptanceChecker = AcceptanceChekcer(type: .exclude,
+                                                       unacceptedCharacters: characters,
+                                                       canAcceptNil: acceptEmptyInput)
+        } else {
+            self.acceptanceChecker = AcceptanceChekcer(type: .include,
+                                                       acceptedCharacters: characters,
+                                                       canAcceptNil: acceptEmptyInput)
+        }
     }
 }
 
-class AntiValueState: BaseState {
-    let stateType: StateType = .value
+class SplitState: BaseState {
+    let stateType: StateType = .split
     var outs: [BaseState]?
-    let acceptanceChecker: AcceptanceChekcer
-    
-    init(acceptEmptyInput: Bool, unacceptedCharacters:Set<Character>) {
-        self.acceptanceChecker = AcceptanceChekcer(type: .exclude,
-                                                   unacceptedCharacters: unacceptedCharacters,
-                                                   canAcceptNil: acceptEmptyInput)
-    }
 }
 
 //class SplitState: BaseState {
@@ -53,7 +54,9 @@ class AntiValueState: BaseState {
 //}
 
 class AcceptState: BaseState {
-    let stateType: StateType = .accept
+    static let shared = AcceptState()
+    let stateType: StateType = .accepted
+    var outs: [BaseState]?
 }
 
 class StateHelper {
@@ -75,13 +78,15 @@ class StateHelper {
                         throw RegExSwiftError("SyntaxError: | 右侧的内容非法")
                     }
                     let nextState = try self.createState(fromNonFunctionalSemanticUnit: nextSemanticUnit)
-                    let splitState = ValueState(acceptEmptyInput: true, acceptedCharacters: [])
+                    
+                    let splitState = SplitState()
                     splitState.outs = [previousState, nextState]
                     stateStack.append(splitState)
                 case .Dot:
-                    let antiState = AntiValueState(acceptEmptyInput: false,
-                                                   unacceptedCharacters: AcceptanceChekcer.whiteSpaceCharacters())
-                    antiState.outs = [AcceptState()]
+                    let antiState = ValueState(acceptEmptyInput: false,
+                               isForExclude: true,
+                               characters: AcceptanceChekcer.whiteSpaceCharacters())
+                    antiState.outs = [AcceptState.shared]
                     stateStack.append(antiState)
                 case .Plus:
                     break
@@ -102,11 +107,11 @@ class StateHelper {
         case .literalLexemeSequence:
             let literalSemanticUnit = semanticUnit as! LiteralSequenceSemantic
             let state = literalSemanticUnit.literals.reversed().reduce(nil) { (result, character) -> ValueState? in
-                let valueState = ValueState(acceptEmptyInput: false, acceptedCharacters: [character])
+                let valueState = ValueState(acceptEmptyInput: false, isForExclude: false, characters: [character])
                 if let result = result {
                     valueState.outs = [result]
                 } else {
-                    valueState.outs = [AcceptState()]
+                    valueState.outs = [AcceptState.shared]
                 }
                 return valueState
             }
@@ -114,8 +119,8 @@ class StateHelper {
             return literalStates
         case .oneClass:
             let classSemanticUnit = semanticUnit as! ClassExpressionSemantic
-            let classState = ValueState(acceptEmptyInput: false, acceptedCharacters: classSemanticUnit.characterSet)
-            classState.outs = [AcceptState()]
+            let classState = ValueState(acceptEmptyInput: false, isForExclude: false, characters: classSemanticUnit.characterSet)
+            classState.outs = [AcceptState.shared]
             return classState
         case .oneGroup:
             throw RegExSwiftError("tmp")
