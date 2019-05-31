@@ -23,9 +23,13 @@ class BaseState {
     func connect(_ state: BaseState) { fatalError() }
 }
 
-class ValueState: BaseState {
+class ValueState: BaseState, CustomDebugStringConvertible {
     let acceptanceChecker: AcceptanceChecker
     var out: BaseState
+    var debugDescription: String {
+        var ret: String = "Value"
+        return ret
+    }
     
     convenience init(isForExclude: Bool, characters:Set<Character>) {
         let acceptanceChecker: AcceptanceChecker = AcceptanceChecker(type: isForExclude ? .exclude : .include, characters: characters)
@@ -46,13 +50,22 @@ class ValueState: BaseState {
         return self.acceptanceChecker.canAccept(character) ? [self.out] : []
     }
     override func connect(_ state: BaseState) {
-        self.out = state
+        if self.out === AcceptState.shared {
+            self.out = state
+        } else {
+            self.out.connect(state)
+        }
     }
 }
 
-class SplitState: BaseState {
+class SplitState: BaseState, CustomDebugStringConvertible {
     var primaryOut: BaseState
     var secondaryOut: BaseState
+    
+    var debugDescription: String {
+        var ret: String = "Split"
+        return ret
+    }
     
     init(primaryOut: BaseState, secondaryOut: BaseState) {
         self.primaryOut = primaryOut
@@ -73,10 +86,15 @@ class SplitState: BaseState {
     }
 }
 
-class RepeatState: BaseState {
+class RepeatState: BaseState, CustomDebugStringConvertible {
     let repeatChecker: RepeatChecker
     let repeatingState: BaseState
     var out: BaseState
+    
+    var debugDescription: String {
+        var ret: String = "Repeat"
+        return ret
+    }
     
     init(with functionalSemanticUnit: FunctionalSemantic, repeatingState: BaseState) {
         self.repeatChecker = RepeatChecker(with: functionalSemanticUnit)
@@ -114,13 +132,22 @@ class RepeatState: BaseState {
     }
     
     override func connect(_ state: BaseState) {
-        self.out = state
+        if self.out === AcceptState.shared {
+            self.out = state
+        } else {
+            self.out.connect(state)
+        }
     }
 }
 
 
-class AcceptState: BaseState {
+class AcceptState: BaseState, CustomDebugStringConvertible {
     static let shared = AcceptState(.accepted)
+    
+    var debugDescription: String {
+        var ret: String = "Accept"
+        return ret
+    }
     
     //MARK: AcceptState Operations
     override func forwardWithEmptyInput() -> [BaseState] {

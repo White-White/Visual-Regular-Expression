@@ -16,11 +16,14 @@ let rg = try! NSRegularExpression.init(pattern: testPattern, options: .caseInsen
 
 let matches = rg.matches(in: matchTarget, options: .anchored, range: NSMakeRange(0, (matchTarget as NSString).length))
 
-print(matches.count)
+//print(matches.count)
 
 do {
-    let pattern = "sdf.[1-6a-z1-7]sdf(dsdsdf(a|b)|c*d\\\\)"
-    let _ = try RegSwift(pattern: pattern)
+    let pattern = "sdf."
+    let string = "sfn"
+    let regSwift = try RegSwift(pattern: pattern)
+    let match = try regSwift.match(string)
+    print(match)
 } catch {
     
 }
