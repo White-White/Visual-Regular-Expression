@@ -12,6 +12,7 @@
 		1F7649D6229E2B58007478F4 /* RegSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F7649D5229E2B58007478F4 /* RegSwift.swift */; };
 		1F7649DC229E456B007478F4 /* AcceptanceChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F7649DB229E456B007478F4 /* AcceptanceChecker.swift */; };
 		1FC3D4B3229FDB4A00151682 /* RepeatChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC3D4B2229FDB4A00151682 /* RepeatChecker.swift */; };
+		1FC3D4B622A1164800151682 /* c.c in Sources */ = {isa = PBXBuildFile; fileRef = 1FC3D4B522A1164800151682 /* c.c */; };
 		1FCE6F2F2297A49400F5A9E8 /* States.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCE6F2E2297A49300F5A9E8 /* States.swift */; };
 		1FCE6F312297E65400F5A9E8 /* RegExSwiftError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCE6F302297E65400F5A9E8 /* RegExSwiftError.swift */; };
 		1FCE6F332297EFFA00F5A9E8 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCE6F322297EFFA00F5A9E8 /* Parser.swift */; };
@@ -36,6 +37,7 @@
 		1F7649D5229E2B58007478F4 /* RegSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegSwift.swift; sourceTree = "<group>"; };
 		1F7649DB229E456B007478F4 /* AcceptanceChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcceptanceChecker.swift; sourceTree = "<group>"; };
 		1FC3D4B2229FDB4A00151682 /* RepeatChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatChecker.swift; sourceTree = "<group>"; };
+		1FC3D4B522A1164800151682 /* c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = c.c; sourceTree = "<group>"; };
 		1FCE6F2E2297A49300F5A9E8 /* States.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = States.swift; sourceTree = "<group>"; };
 		1FCE6F302297E65400F5A9E8 /* RegExSwiftError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegExSwiftError.swift; sourceTree = "<group>"; };
 		1FCE6F322297EFFA00F5A9E8 /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 			children = (
 				1F51EF78228AC3980083E2FE /* main.swift */,
 				1F7649D4229E2B45007478F4 /* RegSwift */,
+				1FC3D4B422A1162F00151682 /* Reference */,
 			);
 			path = RegExSwift;
 			sourceTree = "<group>";
@@ -105,6 +108,14 @@
 				1FC3D4B2229FDB4A00151682 /* RepeatChecker.swift */,
 			);
 			path = States;
+			sourceTree = "<group>";
+		};
+		1FC3D4B422A1162F00151682 /* Reference */ = {
+			isa = PBXGroup;
+			children = (
+				1FC3D4B522A1164800151682 /* c.c */,
+			);
+			path = Reference;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -173,6 +184,7 @@
 				1F7649DC229E456B007478F4 /* AcceptanceChecker.swift in Sources */,
 				1F7649D6229E2B58007478F4 /* RegSwift.swift in Sources */,
 				1FCE6F312297E65400F5A9E8 /* RegExSwiftError.swift in Sources */,
+				1FC3D4B622A1164800151682 /* c.c in Sources */,
 				1FCE6F332297EFFA00F5A9E8 /* Parser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
