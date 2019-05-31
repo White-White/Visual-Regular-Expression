@@ -29,8 +29,12 @@ class RepeatChecker {
         }
     }
     
-    func canRepeat() -> Bool {
+    func repeatCriteriaHasBeenMet() -> Bool {
         return repeatCount >= self.lowerBound && repeatCount <= self.upperBound
+    }
+    
+    func canRepeat() -> Bool {
+        return self.repeatCount < self.upperBound
     }
 
     func forward() {
