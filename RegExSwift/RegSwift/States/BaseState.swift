@@ -11,13 +11,13 @@ import Foundation
 enum StateType {
     case value
     case split
+    case `repeat`
     case accepted
 }
 
 class BaseState {
     let stateType: StateType
     var outs: [BaseState]?
-    func copy() -> BaseState { fatalError("Implementation needed") }
     
     init(_ stateType: StateType) {
         self.stateType = stateType
@@ -25,69 +25,41 @@ class BaseState {
 }
 
 class ValueState: BaseState {
-    let acceptanceChecker: AcceptanceChekcer
-    convenience init(acceptEmptyInput: Bool, isForExclude: Bool, characters:Set<Character>) {
-        let acceptanceChecker: AcceptanceChekcer
-        if isForExclude {
-            acceptanceChecker = AcceptanceChekcer(type: .exclude,
-                                                       unacceptedCharacters: characters,
-                                                       canAcceptNil: acceptEmptyInput)
-        } else {
-            acceptanceChecker = AcceptanceChekcer(type: .include,
-                                                       acceptedCharacters: characters,
-                                                       canAcceptNil: acceptEmptyInput)
-        }
+    let acceptanceChecker: AcceptanceChecker
+    
+    convenience init(isForExclude: Bool, characters:Set<Character>) {
+        let acceptanceChecker: AcceptanceChecker = AcceptanceChecker(type: isForExclude ? .exclude : .include, characters: characters)
         self.init(acceptanceChecker: acceptanceChecker)
     }
     
-    private init(acceptanceChecker: AcceptanceChekcer) {
+    private init(acceptanceChecker: AcceptanceChecker) {
         self.acceptanceChecker = acceptanceChecker
         super.init(.value)
-    }
-    
-    override func copy() -> BaseState {
-        let newValueState = ValueState(acceptanceChecker: self.acceptanceChecker)
-        newValueState.outs = self.outs
-        return newValueState as BaseState
     }
 }
 
 class SplitState: BaseState {
-    
     convenience init() {
         self.init(.split)
     }
-    
-    override func copy() -> BaseState {
-        let newSplit = SplitState()
-        newSplit.outs = self.outs
-        return newSplit
+}
+
+class RepeatState: BaseState {
+    convenience init() {
+        self.init(.repeat)
     }
 }
 
-//class SplitState: BaseState {
-//    let stateType: StateType = .split
-//    let firstValueOut: ValueState
-//    let secondValueOut: ValueState
-//
-//    init(firstValueOut: ValueState, secondValueOut: ValueState) {
-//        self.firstValueOut = firstValueOut
-//        self.secondValueOut = secondValueOut
-//    }
-//}
 
 class AcceptState: BaseState {
     static let shared = AcceptState(.accepted)
-    override func copy() -> BaseState {
-        return AcceptState.shared
-    }
 }
 
 class StateHelper {
     
     func createStates(from semanticUnits: [SemanticUnit]) throws -> BaseState {
         var semanticUnitIte = semanticUnits.makeIterator()
-        var stateStack: [BaseState] = []
+        var bufferedState: BaseState?
         
         while let semanticUnit = semanticUnitIte.next() {
             switch semanticUnit.semanticUnitType {
@@ -95,7 +67,7 @@ class StateHelper {
                 let functionalSemanticUnit = semanticUnit as! FunctionalSemantic
                 switch functionalSemanticUnit.functionalSemanticType {
                 case .Alternation:
-                    guard let previousState = stateStack.popLast() else { throw RegExSwiftError("SyntaxError: | 的前面没有内容") }
+                    guard let previousState = bufferedState else { throw RegExSwiftError("SyntaxError: | 的前面没有内容") }
                     guard let nextSemanticUnit = semanticUnitIte.next() else { throw RegExSwiftError("SyntaxError: | 的后面没有内容") }
                     guard nextSemanticUnit.semanticUnitType != .functionalSymbol else {
                         throw RegExSwiftError("SyntaxError: | 右侧的内容非法")
@@ -104,31 +76,27 @@ class StateHelper {
                     let nextState = try self.createState(fromNonFunctionalSemanticUnit: nextSemanticUnit)
                     let splitState = SplitState()
                     splitState.outs = [previousState, nextState]
-                    stateStack.append(splitState)
+                    bufferedState = splitState
                 case .Dot:
-                    let antiState = ValueState(acceptEmptyInput: false,
-                               isForExclude: true,
-                               characters: AcceptanceChekcer.whiteSpaceCharacters())
-                    antiState.outs = [AcceptState.shared]
-                    stateStack.append(antiState)
+                    let antiState = ValueState(isForExclude: true, characters: AcceptanceChecker.whiteSpaceCharacters())
+                    if let previousState = bufferedState {
+                        connect(previousState, antiState)
+                        bufferedState = previousState
+                    } else {
+                        bufferedState = antiState
+                    }
                 case .Plus:
-                    guard let previousState = stateStack.popLast() else { throw RegExSwiftError("SyntaxError: | 的前面没有内容") }
-                    let sameState = previousState.copy()
-                    sameState.outs = [sameState, AcceptState.shared]
-                    previousState.outs = [sameState]
-                    stateStack.append(previousState)
+                    guard let previousState = bufferedState else { throw RegExSwiftError("SyntaxError: + 的前面没有内容") }
                 case .Star:
-                    guard let previousState = stateStack.popLast() else { throw RegExSwiftError("SyntaxError: | 的前面没有内容") }
-                    previousState.outs = [previousState, AcceptState.shared]
-                    stateStack.append(previousState)
+                    guard let previousState = bufferedState else { throw RegExSwiftError("SyntaxError: * 的前面没有内容") }
                 }
             default:
                 let state = try self.createState(fromNonFunctionalSemanticUnit: semanticUnit)
-                stateStack.append(state)
+                bufferedState = state
             }
         }
         
-        guard let retState = stateStack.last else {
+        guard let retState = bufferedState else {
             throw RegExSwiftError("InternalError: There supposed to be at least one state in the stack")
         }
         
@@ -142,7 +110,7 @@ class StateHelper {
         case .literalLexemeSequence:
             let literalSemanticUnit = semanticUnit as! LiteralSequenceSemantic
             let state = literalSemanticUnit.literals.reversed().reduce(nil) { (result, character) -> ValueState? in
-                let valueState = ValueState(acceptEmptyInput: false, isForExclude: false, characters: [character])
+                let valueState = ValueState(isForExclude: false, characters: [character])
                 if let result = result {
                     valueState.outs = [result]
                 } else {
@@ -154,7 +122,7 @@ class StateHelper {
             return literalStates
         case .oneClass:
             let classSemanticUnit = semanticUnit as! ClassExpressionSemantic
-            let classState = ValueState(acceptEmptyInput: false, isForExclude: false, characters: classSemanticUnit.characterSet)
+            let classState = ValueState(isForExclude: false, characters: classSemanticUnit.characterSet)
             classState.outs = [AcceptState.shared]
             return classState
         case .oneGroup:
@@ -175,4 +143,12 @@ class StateHelper {
 //    static func createAcceptingState() -> AcceptingState {
 //        return AcceptingStateImp()
 //    }
+    
+    private func connect(_ preState: BaseState, _ nextState: BaseState) {
+        if let outs = preState.outs {
+            outs.forEach { connect($0, nextState) }
+        } else {
+            preState.outs = [nextState]
+        }
+    }
 }
