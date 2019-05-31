@@ -15,9 +15,7 @@ class RegSwift {
         let lexemes = try lexer.createLexemes()
         let parser = try Parser(lexemes: lexemes)
         let semanticUnits = try parser.getSemanticUnits()
-        try StateHelper().createStates(from: semanticUnits)
-        
-        print(1)
+        let headState = try StatesCreator.createHeadState(from: semanticUnits)
     }
     
 }

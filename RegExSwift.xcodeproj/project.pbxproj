@@ -11,10 +11,9 @@
 		1F51EF80228AC5400083E2FE /* Lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F51EF7F228AC5400083E2FE /* Lexer.swift */; };
 		1F51EF82228AC8110083E2FE /* Expression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F51EF81228AC8110083E2FE /* Expression.swift */; };
 		1F7649D6229E2B58007478F4 /* RegSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F7649D5229E2B58007478F4 /* RegSwift.swift */; };
-		1F7649DA229E2CCF007478F4 /* States.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F7649D9229E2CCF007478F4 /* States.swift */; };
 		1F7649DC229E456B007478F4 /* AcceptanceChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F7649DB229E456B007478F4 /* AcceptanceChecker.swift */; };
 		1FC3D4B3229FDB4A00151682 /* RepeatChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC3D4B2229FDB4A00151682 /* RepeatChecker.swift */; };
-		1FCE6F2F2297A49400F5A9E8 /* BaseState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCE6F2E2297A49300F5A9E8 /* BaseState.swift */; };
+		1FCE6F2F2297A49400F5A9E8 /* States.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCE6F2E2297A49300F5A9E8 /* States.swift */; };
 		1FCE6F312297E65400F5A9E8 /* RegExSwiftError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCE6F302297E65400F5A9E8 /* RegExSwiftError.swift */; };
 		1FCE6F332297EFFA00F5A9E8 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCE6F322297EFFA00F5A9E8 /* Parser.swift */; };
 		1FD10D5C228D337800BA0C6B /* Fragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD10D5B228D337800BA0C6B /* Fragment.swift */; };
@@ -38,10 +37,9 @@
 		1F51EF7F228AC5400083E2FE /* Lexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lexer.swift; sourceTree = "<group>"; };
 		1F51EF81228AC8110083E2FE /* Expression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expression.swift; sourceTree = "<group>"; };
 		1F7649D5229E2B58007478F4 /* RegSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegSwift.swift; sourceTree = "<group>"; };
-		1F7649D9229E2CCF007478F4 /* States.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = States.swift; sourceTree = "<group>"; };
 		1F7649DB229E456B007478F4 /* AcceptanceChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcceptanceChecker.swift; sourceTree = "<group>"; };
 		1FC3D4B2229FDB4A00151682 /* RepeatChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatChecker.swift; sourceTree = "<group>"; };
-		1FCE6F2E2297A49300F5A9E8 /* BaseState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseState.swift; sourceTree = "<group>"; };
+		1FCE6F2E2297A49300F5A9E8 /* States.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = States.swift; sourceTree = "<group>"; };
 		1FCE6F302297E65400F5A9E8 /* RegExSwiftError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegExSwiftError.swift; sourceTree = "<group>"; };
 		1FCE6F322297EFFA00F5A9E8 /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
 		1FD10D5B228D337800BA0C6B /* Fragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fragment.swift; sourceTree = "<group>"; };
@@ -108,8 +106,7 @@
 		1F7649D8229E2CC1007478F4 /* States */ = {
 			isa = PBXGroup;
 			children = (
-				1F7649D9229E2CCF007478F4 /* States.swift */,
-				1FCE6F2E2297A49300F5A9E8 /* BaseState.swift */,
+				1FCE6F2E2297A49300F5A9E8 /* States.swift */,
 				1F7649DB229E456B007478F4 /* AcceptanceChecker.swift */,
 				1FC3D4B2229FDB4A00151682 /* RepeatChecker.swift */,
 			);
@@ -179,11 +176,10 @@
 				1F51EF80228AC5400083E2FE /* Lexer.swift in Sources */,
 				1FD10D5C228D337800BA0C6B /* Fragment.swift in Sources */,
 				1F51EF79228AC3980083E2FE /* main.swift in Sources */,
-				1FCE6F2F2297A49400F5A9E8 /* BaseState.swift in Sources */,
+				1FCE6F2F2297A49400F5A9E8 /* States.swift in Sources */,
 				1F7649DC229E456B007478F4 /* AcceptanceChecker.swift in Sources */,
 				1F7649D6229E2B58007478F4 /* RegSwift.swift in Sources */,
 				1FCE6F312297E65400F5A9E8 /* RegExSwiftError.swift in Sources */,
-				1F7649DA229E2CCF007478F4 /* States.swift in Sources */,
 				1F51EF82228AC8110083E2FE /* Expression.swift in Sources */,
 				1FCE6F332297EFFA00F5A9E8 /* Parser.swift in Sources */,
 			);
