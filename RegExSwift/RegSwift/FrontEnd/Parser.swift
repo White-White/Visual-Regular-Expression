@@ -228,12 +228,12 @@ class Parser {
         
         guard let asciiStart = startLiteralLexeme.value.asciiValue, let asciiEnd = endLiteralLexeme.value.asciiValue else { throw RegExSwiftError("SyntaxErrorInClass: Both side of the hyphen must be a valid ascii value") }
         
-        let numZero: uint8 = 48
-        let numNine: uint8 = 57
-        let lettera: uint8 = 97
-        let letterz: uint8 = 122
-        let letterA: uint8 = 65
-        let letterZ: uint8 = 90
+        let numZero: UInt8 = 48
+        let numNine: UInt8 = 57
+        let lettera: UInt8 = 97
+        let letterz: UInt8 = 122
+        let letterA: UInt8 = 65
+        let letterZ: UInt8 = 90
         
         //ascii table reference:
         //https://www.cs.cmu.edu/~pattis/15-1XX/common/handouts/ascii.html
