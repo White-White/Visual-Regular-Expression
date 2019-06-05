@@ -8,11 +8,11 @@
 
 import Foundation
 
-class RegSwift {
+public final class RegSwift {
     let headState: BaseState
     private let parrern: String
     
-    init(pattern: String) throws {
+    public init(pattern: String) throws {
         self.parrern = pattern
         let lexer = Lexer(pattern: pattern)
         let lexemes = try lexer.createLexemes()
@@ -22,7 +22,7 @@ class RegSwift {
         self.headState = headState
     }
     
-    func match(_ m: String) throws -> Bool {
+    public func match(_ m: String) throws -> Bool {
         print("开始匹配。预置pattern: \(self.parrern)")
         print("目标string: \(m)")
         

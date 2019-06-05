@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct RegExSwiftError: Error {
+public struct RegExSwiftError: Error {
     let reason: String
     init(_ r: String) { self.reason = r }
 }
