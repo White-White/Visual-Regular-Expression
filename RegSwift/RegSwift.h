@@ -6,7 +6,7 @@
 //  Copyright © 2019 Ali-White. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <AppKit/AppKit.h>
 
 //! Project version number for RegSwift.
 FOUNDATION_EXPORT double RegSwiftVersionNumber;
