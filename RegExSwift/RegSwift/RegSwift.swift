@@ -8,11 +8,12 @@
 
 import Foundation
 
-class RegSwift {
+public class RegSwift: NSObject {
     private let headState: BaseState
     private let parrern: String
     
-    init(pattern: String) throws {
+    @objc
+    public init(pattern: String) throws {
         self.parrern = pattern
         let lexer = Lexer(pattern: pattern)
         let lexemes = try lexer.createLexemes()
@@ -59,7 +60,8 @@ class RegSwift {
 
 //MARK: - Nodes
 extension RegSwift {
-    func getNodeHead() -> GraphNode {
+    @objc
+    public func getNodeHead() -> GraphNode {
         return self.headState as GraphNode
     }
 }

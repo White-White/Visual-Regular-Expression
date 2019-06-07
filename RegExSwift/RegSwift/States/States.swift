@@ -18,6 +18,7 @@ enum StateType {
 
 class BaseState: NSObject {
     let stateName: String
+    var inputSetDescription: String?
     let stateType: StateType
     init(_ stateType: StateType, stateName: String) { self.stateType = stateType; self.stateName = stateName }
     func forwardWithEmptyInput() -> [BaseState] { fatalError() }
@@ -39,6 +40,7 @@ class ValueState: BaseState {
         self.acceptanceChecker = acceptanceChecker
         self.out = AcceptState.shared
         super.init(.value, stateName: stateName)
+        self.inputSetDescription = acceptanceChecker.inputSetDescription()
     }
     
     //MARK: ValueState Operations

@@ -8,15 +8,20 @@
 
 import Foundation
 
-public protocol GraphNode: NSObjectProtocol {
+@objc
+public protocol GraphNode {
     var nodeName: String { get }
+    var inputCharactersDescription: String { get }
     var highLighted: Bool { get }
     var nextNodes: [GraphNode] { get }
 }
 
 extension BaseState: GraphNode {
-    var nodeName: String { return self.stateName }
+//    var nodeName: String { return self.stateName }
+    var nodeName: String { return self.debugDescription }
+    var inputCharactersDescription: String { return self.inputSetDescription ?? "NEEDFIX" }
     var highLighted: Bool { return false }
+    
     var nextNodes: [GraphNode] {
         switch self.stateType {
         case .value:

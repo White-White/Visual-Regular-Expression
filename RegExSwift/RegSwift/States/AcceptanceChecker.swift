@@ -31,6 +31,17 @@ struct AcceptanceChecker {
         }
     }
     
+    func inputSetDescription() -> String {
+        let array = Array(self.characters).map { String($0) }
+        let joinedString = array.joined(separator: ", ")
+        switch self.type {
+        case .include:
+            return joinedString
+        case .exclude:
+            return "! " + joinedString
+        }
+    }
+    
     //MARK: helper methods
     static func whiteSpaceCharacters() -> Set<Character> {
         return Set(arrayLiteral: " ", "\t")
