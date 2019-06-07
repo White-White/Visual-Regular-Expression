@@ -40,4 +40,8 @@ class RepeatChecker {
     func forward() {
         repeatCount += 1
     }
+    
+    func allowZeroRepeat() -> Bool {
+        return self.lowerBound == 0
+    }
 }

@@ -8,7 +8,12 @@
 
 import Foundation
 
-public struct RegExSwiftError: Error {
+public class RegExSwiftError: CustomNSError {
     let reason: String
     init(_ r: String) { self.reason = r }
+    
+    public static var errorDomain: String { return "RegExSwift" }
+    public var errorCode: Int { return 0 }
+    public var errorUserInfo: [String : Any] { return [:] }
+    public var localizedDescription: String { self.reason }
 }

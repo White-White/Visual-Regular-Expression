@@ -10,36 +10,35 @@ import Foundation
 
 enum StateType {
     case value
+    case dumb
     case split
     case `repeat`
     case accepted
 }
 
-class BaseState {
+class BaseState: NSObject {
+    let stateName: String
     let stateType: StateType
-    init(_ stateType: StateType) { self.stateType = stateType }
+    init(_ stateType: StateType, stateName: String) { self.stateType = stateType; self.stateName = stateName }
     func forwardWithEmptyInput() -> [BaseState] { fatalError() }
     func forwardWithInput(_ character: Character) -> [BaseState] { fatalError() }
     func connect(_ state: BaseState) { fatalError() }
 }
 
-class ValueState: BaseState, CustomDebugStringConvertible {
+class ValueState: BaseState {
     let acceptanceChecker: AcceptanceChecker
     var out: BaseState
-    var debugDescription: String {
-        var ret: String = "Value"
-        return ret
-    }
+    override var debugDescription: String { return String(format: "Value %@", self.stateName) }
     
-    convenience init(isForExclude: Bool, characters:Set<Character>) {
+    convenience init(isForExclude: Bool, characters:Set<Character>, stateName: String) {
         let acceptanceChecker: AcceptanceChecker = AcceptanceChecker(type: isForExclude ? .exclude : .include, characters: characters)
-        self.init(acceptanceChecker: acceptanceChecker)
+        self.init(acceptanceChecker: acceptanceChecker, stateName: stateName)
     }
     
-    private init(acceptanceChecker: AcceptanceChecker) {
+    private init(acceptanceChecker: AcceptanceChecker, stateName: String) {
         self.acceptanceChecker = acceptanceChecker
         self.out = AcceptState.shared
-        super.init(.value)
+        super.init(.value, stateName: stateName)
     }
     
     //MARK: ValueState Operations
@@ -58,19 +57,16 @@ class ValueState: BaseState, CustomDebugStringConvertible {
     }
 }
 
-class SplitState: BaseState, CustomDebugStringConvertible {
+class SplitState: BaseState {
     var primaryOut: BaseState
     var secondaryOut: BaseState
     
-    var debugDescription: String {
-        var ret: String = "Split"
-        return ret
-    }
+    override var debugDescription: String { return String(format: "Split %@", self.stateName) }
     
-    init(primaryOut: BaseState, secondaryOut: BaseState) {
+    init(primaryOut: BaseState, secondaryOut: BaseState, stateName: String) {
         self.primaryOut = primaryOut
         self.secondaryOut = secondaryOut
-        super.init(.split)
+        super.init(.split, stateName: stateName)
     }
     
     //MARK: SplitState Operations
@@ -86,29 +82,59 @@ class SplitState: BaseState, CustomDebugStringConvertible {
     }
 }
 
-class RepeatState: BaseState, CustomDebugStringConvertible {
-    let repeatChecker: RepeatChecker
-    let repeatingState: BaseState
+
+//MARK: - Dummy
+
+protocol DumbStateDelegate: NSObjectProtocol {
+    func dummy_forwardWithEmptyInput() -> [BaseState]
+    func dummy_forwardWithInput(_ character: Character) -> [BaseState]
+}
+
+class DumbState: BaseState {
     var out: BaseState
+    weak var delegate: DumbStateDelegate?
+    override var debugDescription: String { return String(format: "Dummy %@", self.stateName) }
     
-    var debugDescription: String {
-        var ret: String = "Repeat"
-        return ret
+    init(stateName: String) {
+        self.out = AcceptState.shared
+        super.init(.dumb, stateName: stateName)
     }
     
-    init(with functionalSemanticUnit: FunctionalSemantic, repeatingState: BaseState) {
+    override func forwardWithEmptyInput() -> [BaseState] {
+        return self.delegate!.dummy_forwardWithEmptyInput()
+    }
+    override func forwardWithInput(_ character: Character) -> [BaseState] {
+        return self.delegate!.dummy_forwardWithInput(character)
+    }
+    override func connect(_ state: BaseState) {
+        guard self.out === AcceptState.shared else { fatalError() }
+        self.out = state
+    }
+}
+
+//MARK: - RepeatState
+
+class RepeatState: BaseState {
+    let repeatChecker: RepeatChecker
+    let repeatingState: BaseState
+    var dummyEnd: DumbState
+    
+    override var debugDescription: String { return String(format: "Repeat %@", self.stateName) }
+    
+    init(with functionalSemanticUnit: FunctionalSemantic, repeatingState: BaseState, stateName: String) {
         self.repeatChecker = RepeatChecker(with: functionalSemanticUnit)
         self.repeatingState = repeatingState
-        self.out = AcceptState.shared
-        super.init(.repeat)
-        self.repeatingState.connect(self)
+        self.dummyEnd = DumbState(stateName: stateName + "_end")
+        super.init(.repeat, stateName: stateName)
+        self.dummyEnd.delegate = self
+        self.repeatingState.connect(self.dummyEnd)
     }
     
     //MARK: RepeatState Operations
     override func forwardWithEmptyInput() -> [BaseState] {
         if self.repeatChecker.repeatCriteriaHasBeenMet() {
             var result: [BaseState] = []
-            result += self.out.forwardWithEmptyInput()
+            result += self.dummyEnd.out.forwardWithEmptyInput()
             if self.repeatChecker.canRepeat() {
                 result += self.repeatingState.forwardWithEmptyInput()
             }
@@ -121,7 +147,7 @@ class RepeatState: BaseState, CustomDebugStringConvertible {
     override func forwardWithInput(_ character: Character) -> [BaseState] {
         if self.repeatChecker.repeatCriteriaHasBeenMet() {
             var result: [BaseState] = []
-            result += self.out.forwardWithInput(character)
+            result += self.dummyEnd.out.forwardWithInput(character)
             if self.repeatChecker.canRepeat() {
                 result += self.repeatingState.forwardWithInput(character)
             }
@@ -132,22 +158,25 @@ class RepeatState: BaseState, CustomDebugStringConvertible {
     }
     
     override func connect(_ state: BaseState) {
-        if self.out === AcceptState.shared {
-            self.out = state
-        } else {
-            self.out.connect(state)
-        }
+        self.dummyEnd.connect(state)
+    }
+}
+
+extension RepeatState: DumbStateDelegate {
+    func dummy_forwardWithEmptyInput() -> [BaseState] {
+        return self.forwardWithEmptyInput()
+    }
+    
+    func dummy_forwardWithInput(_ character: Character) -> [BaseState] {
+        return self.dummy_forwardWithInput(character)
     }
 }
 
 
-class AcceptState: BaseState, CustomDebugStringConvertible {
-    static let shared = AcceptState(.accepted)
+class AcceptState: BaseState {
+    static let shared = AcceptState(.accepted, stateName: "Accept")
     
-    var debugDescription: String {
-        var ret: String = "Accept"
-        return ret
-    }
+    override var debugDescription: String { return String(format: "Accept %@", self.stateName) }
     
     //MARK: AcceptState Operations
     override func forwardWithEmptyInput() -> [BaseState] {
@@ -161,14 +190,26 @@ class AcceptState: BaseState, CustomDebugStringConvertible {
     }
 }
 
+
+private struct StateNameCreator {
+    var start = 0
+    mutating func nextName() -> String {
+        let temp = start
+        start += 1
+        return "S\(temp)"
+    }
+}
+
 class StatesCreator {
     
     static func createHeadState(from semanticUnits: [SemanticUnit]) throws -> BaseState {
-        let states = try self.createStates(from: semanticUnits)
+        var stateNameCreator = StateNameCreator()
+        let states = try self.createStates(from: semanticUnits, stateNameCreator: &stateNameCreator)
         return states.first!
     }
     
-    private static func createStates(from semanticUnits: [SemanticUnit]) throws -> [BaseState] {
+    private static func createStates(from semanticUnits: [SemanticUnit], stateNameCreator: inout StateNameCreator) throws -> [BaseState] {
+        
         var semanticUnitIte = semanticUnits.makeIterator()
         var stateStack: [BaseState] = []
         
@@ -184,53 +225,48 @@ class StatesCreator {
                         throw RegExSwiftError("SyntaxError: | 右侧的内容非法")
                     }
                     
-                    let statesAtRightSide = try self.createStates(from: [nextSemanticUnit])
+                    let statesAtRightSide = try self.createStates(from: [nextSemanticUnit], stateNameCreator: &stateNameCreator)
                     let splitState = SplitState(primaryOut: previousState,
-                                                secondaryOut: statesAtRightSide.first!)
+                                                secondaryOut: statesAtRightSide.first!, stateName: stateNameCreator.nextName())
                     stateStack.last?.connect(splitState)
                     stateStack.append(splitState)
                 case .Dot:
-                    let antiState = ValueState(isForExclude: true, characters: AcceptanceChecker.whiteSpaceCharacters())
+                    let antiState = ValueState(isForExclude: true, characters: AcceptanceChecker.whiteSpaceCharacters(), stateName: stateNameCreator.nextName())
                     stateStack.last?.connect(antiState)
                     stateStack.append(antiState)
                 case .Plus:
                     fallthrough
                 case .Star:
                     guard let previousState = stateStack.popLast() else { throw RegExSwiftError("SyntaxError: \(functionalSemanticUnit) 的前面没有内容") }
-                    let repeatState = RepeatState(with: functionalSemanticUnit, repeatingState: previousState)
+                    let repeatState = RepeatState(with: functionalSemanticUnit, repeatingState: previousState, stateName: stateNameCreator.nextName())
                     stateStack.last?.connect(repeatState)
                     stateStack.append(repeatState)
                 }
             case .literalLexemeSequence:
-                let literalState = try self.createState(fromLiteralSemanticUnit: semanticUnit as! LiteralSequenceSemantic)
-                stateStack.last?.connect(literalState)
-                stateStack.append(literalState)
+                let state = (semanticUnit as! LiteralSequenceSemantic).literals.reduce(nil) { (previous, character) -> ValueState? in
+                    let valueState = ValueState(isForExclude: false, characters: [character], stateName: stateNameCreator.nextName())
+                    if let previous = previous {
+                        previous.connect(valueState)
+                        return previous
+                    } else {
+                        return valueState
+                    }
+                }
+                guard let literalStates = state else { throw RegExSwiftError("空的Literal 理论上不可能发生") }
+                stateStack.last?.connect(literalStates)
+                stateStack.append(literalStates)
             case .oneClass:
-                let classState = ValueState(isForExclude: false, characters: (semanticUnit as! ClassExpressionSemantic).characterSet)
+                let classState = ValueState(isForExclude: false, characters: (semanticUnit as! ClassExpressionSemantic).characterSet, stateName: stateNameCreator.nextName())
                 stateStack.last?.connect(classState)
                 stateStack.append(classState)
             case .oneGroup:
                 let groupSemanticUnit = semanticUnit as! GroupExpressionSemantic
-                let statesFromGroup = try self.createStates(from: groupSemanticUnit.semanticUnits)
+                let statesFromGroup = try self.createStates(from: groupSemanticUnit.semanticUnits, stateNameCreator: &stateNameCreator)
                 guard !statesFromGroup.isEmpty else { continue }
                 stateStack.last?.connect(statesFromGroup.first!)
                 stateStack.append(contentsOf: statesFromGroup)
             }
         }
         return  stateStack
-    }
-    
-    private static func createState(fromLiteralSemanticUnit literalSemanticUnit: LiteralSequenceSemantic) throws -> BaseState {
-        let state = literalSemanticUnit.literals.reduce(nil) { (previous, character) -> ValueState? in
-            let valueState = ValueState(isForExclude: false, characters: [character])
-            if let previous = previous {
-                previous.connect(valueState)
-                return previous
-            } else {
-                return valueState
-            }
-        }
-        guard let literalStates = state else { throw RegExSwiftError("空的Literal 理论上不可能发生") }
-        return literalStates
     }
 }

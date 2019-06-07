@@ -7,7 +7,8 @@
 //
 
 #import "AppDelegate.h"
-#import "gvc.h"
+#import "cgraph.h"
+#import <RegExSwift/RegExSwift-Swift.h>
 
 @interface AppDelegate ()
 
@@ -17,8 +18,29 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
-    gvContext();
     
+    NSError *error = nil;
+    
+    
+    Agraph_t *g;
+    g = agopen("G", Agdirected, NULL);
+    
+    Agnode_t *firstNode;
+    firstNode = agnode(g, "NodeA", TRUE);
+    
+    Agnode_t *secondNode;
+    secondNode = agnode(g, "NodeB", TRUE);
+    
+    Agedge_t *edge_A_B = agedge(g, firstNode, secondNode, "bridge", TRUE);
+    
+    agattr(g, AGNODE, "shape", "box");
+    
+    agwrite(g, stdout);
+    agclose(g);
+    
+//    agsafeset(<#void *obj#>, <#char *name#>, <#char *value#>, <#char *def#>)
+    
+    NSLog(@"1");
 }
 
 

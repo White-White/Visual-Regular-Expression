@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F5DCB6122A95FBC008ECC24 /* GVApplicationDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F5DCB6022A95FBC008ECC24 /* GVApplicationDelegate.m */; };
+		1F5DCB7A22AA4B8B008ECC24 /* RegExSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F5DCB7922AA4B8B008ECC24 /* RegExSwift.framework */; };
+		1F5DCB7B22AA4B8B008ECC24 /* RegExSwift.framework in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1F5DCB7922AA4B8B008ECC24 /* RegExSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1F77618922A8FC1600400878 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77618822A8FC1600400878 /* AppDelegate.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1F77619122A8FC1800400878 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77619022A8FC1800400878 /* main.m */; };
 		1F7761A322A8FC2D00400878 /* GVAttributeInspectorController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77614522A8F84900400878 /* GVAttributeInspectorController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -36,6 +39,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				1F5DCB7B22AA4B8B008ECC24 /* RegExSwift.framework in Embed Libraries */,
 				1F7761AE22A8FDFE00400878 /* libcdt.5.dylib in Embed Libraries */,
 				1F7761B222A8FDFE00400878 /* libgvc.6.dylib in Embed Libraries */,
 				1F7761B022A8FDFE00400878 /* libcgraph.6.dylib in Embed Libraries */,
@@ -47,6 +51,10 @@
 
 /* Begin PBXFileReference section */
 		1F06F80922A7627A00A0E563 /* RegSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RegSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F5DCB5F22A95FBB008ECC24 /* GVApplicationDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GVApplicationDelegate.h; sourceTree = "<group>"; };
+		1F5DCB6022A95FBC008ECC24 /* GVApplicationDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVApplicationDelegate.m; sourceTree = "<group>"; };
+		1F5DCB6222AA49DC008ECC24 /* RegSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RegSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F5DCB7922AA4B8B008ECC24 /* RegExSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RegExSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F7760FA22A8F1A500400878 /* libcdt.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcdt.5.dylib; sourceTree = "<group>"; };
 		1F7760FC22A8F1D100400878 /* libcgraph.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcgraph.6.dylib; sourceTree = "<group>"; };
 		1F7760FE22A8F1DC00400878 /* libgvc.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libgvc.6.dylib; sourceTree = "<group>"; };
@@ -137,6 +145,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F5DCB7A22AA4B8B008ECC24 /* RegExSwift.framework in Frameworks */,
 				1F7761AD22A8FDFE00400878 /* libcdt.5.dylib in Frameworks */,
 				1F7761B122A8FDFE00400878 /* libgvc.6.dylib in Frameworks */,
 				1F7761AF22A8FDFE00400878 /* libcgraph.6.dylib in Frameworks */,
@@ -176,6 +185,8 @@
 		1F06F80822A7627A00A0E563 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1F5DCB7922AA4B8B008ECC24 /* RegExSwift.framework */,
+				1F5DCB6222AA49DC008ECC24 /* RegSwift.framework */,
 				1F06F80922A7627A00A0E563 /* RegSwift.framework */,
 			);
 			name = Frameworks;
@@ -296,6 +307,8 @@
 			isa = PBXGroup;
 			children = (
 				1F7761AC22A8FCC300400878 /* Prefix.h */,
+				1F5DCB5F22A95FBB008ECC24 /* GVApplicationDelegate.h */,
+				1F5DCB6022A95FBC008ECC24 /* GVApplicationDelegate.m */,
 				1F77614122A8F84900400878 /* GVAttributeInspectorController.h */,
 				1F77614522A8F84900400878 /* GVAttributeInspectorController.m */,
 				1F77614422A8F84900400878 /* GVAttributeSchema.h */,
@@ -406,6 +419,7 @@
 			files = (
 				1F77619122A8FC1800400878 /* main.m in Sources */,
 				1F7761AB22A8FC2D00400878 /* GVWindowController.m in Sources */,
+				1F5DCB6122A95FBC008ECC24 /* GVApplicationDelegate.m in Sources */,
 				1F7761A922A8FC2D00400878 /* GVGraphArguments.m in Sources */,
 				1F7761A622A8FC2D00400878 /* GVExportViewController.m in Sources */,
 				1F7761A822A8FC2D00400878 /* GVGraph.m in Sources */,
