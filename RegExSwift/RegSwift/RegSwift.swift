@@ -56,3 +56,10 @@ class RegSwift {
         return false
     }
 }
+
+//MARK: - Nodes
+extension RegSwift {
+    func getNodeHead() -> GraphNode {
+        return self.headState as GraphNode
+    }
+}
