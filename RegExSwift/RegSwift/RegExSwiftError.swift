@@ -15,5 +15,5 @@ public class RegExSwiftError: CustomNSError {
     public static var errorDomain: String { return "RegExSwift" }
     public var errorCode: Int { return 0 }
     public var errorUserInfo: [String : Any] { return [:] }
-    public var localizedDescription: String { self.reason }
+    public var localizedDescription: String { return self.reason }
 }

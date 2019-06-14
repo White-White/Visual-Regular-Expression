@@ -24,12 +24,13 @@ class BaseState: NSObject {
     func forwardWithEmptyInput() -> [BaseState] { fatalError() }
     func forwardWithInput(_ character: Character) -> [BaseState] { fatalError() }
     func connect(_ state: BaseState) { fatalError() }
+    override var debugDescription: String { return self.stateName + "\n\(self.stateType)" }
 }
 
 class ValueState: BaseState {
     let acceptanceChecker: AcceptanceChecker
     var out: BaseState
-    override var debugDescription: String { return String(format: "Value %@", self.stateName) }
+//    override var debugDescription: String { return String(format: "Value %@", self.stateName) }
     
     convenience init(isForExclude: Bool, characters:Set<Character>, stateName: String) {
         let acceptanceChecker: AcceptanceChecker = AcceptanceChecker(type: isForExclude ? .exclude : .include, characters: characters)
@@ -62,8 +63,7 @@ class ValueState: BaseState {
 class SplitState: BaseState {
     var primaryOut: BaseState
     var secondaryOut: BaseState
-    
-    override var debugDescription: String { return String(format: "Split %@", self.stateName) }
+//    override var debugDescription: String { return String(format: "Split %@", self.stateName) }
     
     init(primaryOut: BaseState, secondaryOut: BaseState, stateName: String) {
         self.primaryOut = primaryOut
@@ -95,7 +95,7 @@ protocol DumbStateDelegate: NSObjectProtocol {
 class DumbState: BaseState {
     var out: BaseState
     weak var delegate: DumbStateDelegate?
-    override var debugDescription: String { return String(format: "Dummy %@", self.stateName) }
+//    override var debugDescription: String { return String(format: "Dummy %@", self.stateName) }
     
     init(stateName: String) {
         self.out = AcceptState.shared
@@ -120,8 +120,7 @@ class RepeatState: BaseState {
     let repeatChecker: RepeatChecker
     let repeatingState: BaseState
     var dummyEnd: DumbState
-    
-    override var debugDescription: String { return String(format: "Repeat %@", self.stateName) }
+//    override var debugDescription: String { return String(format: "Repeat %@", self.stateName) }
     
     init(with functionalSemanticUnit: FunctionalSemantic, repeatingState: BaseState, stateName: String) {
         self.repeatChecker = RepeatChecker(with: functionalSemanticUnit)

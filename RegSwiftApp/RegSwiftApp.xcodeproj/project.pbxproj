@@ -10,6 +10,9 @@
 		1F5DCB6122A95FBC008ECC24 /* GVApplicationDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F5DCB6022A95FBC008ECC24 /* GVApplicationDelegate.m */; };
 		1F5DCB7A22AA4B8B008ECC24 /* RegExSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F5DCB7922AA4B8B008ECC24 /* RegExSwift.framework */; };
 		1F5DCB7B22AA4B8B008ECC24 /* RegExSwift.framework in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1F5DCB7922AA4B8B008ECC24 /* RegExSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1F657A0422B37EAB0027275D /* MyMainController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F657A0322B37EAB0027275D /* MyMainController.m */; };
+		1F657A0722B3813E0027275D /* NSLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F657A0622B3813E0027275D /* NSLabel.m */; };
+		1F657A0A22B385620027275D /* GraphHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F657A0922B385620027275D /* GraphHelper.m */; };
 		1F77618922A8FC1600400878 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77618822A8FC1600400878 /* AppDelegate.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1F77619122A8FC1800400878 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77619022A8FC1800400878 /* main.m */; };
 		1F7761A322A8FC2D00400878 /* GVAttributeInspectorController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77614522A8F84900400878 /* GVAttributeInspectorController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -55,6 +58,12 @@
 		1F5DCB6022A95FBC008ECC24 /* GVApplicationDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVApplicationDelegate.m; sourceTree = "<group>"; };
 		1F5DCB6222AA49DC008ECC24 /* RegSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RegSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F5DCB7922AA4B8B008ECC24 /* RegExSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RegExSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F657A0222B37EAB0027275D /* MyMainController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyMainController.h; sourceTree = "<group>"; };
+		1F657A0322B37EAB0027275D /* MyMainController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MyMainController.m; sourceTree = "<group>"; };
+		1F657A0522B3813E0027275D /* NSLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSLabel.h; sourceTree = "<group>"; };
+		1F657A0622B3813E0027275D /* NSLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSLabel.m; sourceTree = "<group>"; };
+		1F657A0822B385620027275D /* GraphHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GraphHelper.h; sourceTree = "<group>"; };
+		1F657A0922B385620027275D /* GraphHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GraphHelper.m; sourceTree = "<group>"; };
 		1F7760FA22A8F1A500400878 /* libcdt.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcdt.5.dylib; sourceTree = "<group>"; };
 		1F7760FC22A8F1D100400878 /* libcgraph.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcgraph.6.dylib; sourceTree = "<group>"; };
 		1F7760FE22A8F1DC00400878 /* libgvc.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libgvc.6.dylib; sourceTree = "<group>"; };
@@ -336,6 +345,12 @@
 			children = (
 				1F77618722A8FC1600400878 /* AppDelegate.h */,
 				1F77618822A8FC1600400878 /* AppDelegate.m */,
+				1F657A0822B385620027275D /* GraphHelper.h */,
+				1F657A0922B385620027275D /* GraphHelper.m */,
+				1F657A0222B37EAB0027275D /* MyMainController.h */,
+				1F657A0322B37EAB0027275D /* MyMainController.m */,
+				1F657A0522B3813E0027275D /* NSLabel.h */,
+				1F657A0622B3813E0027275D /* NSLabel.m */,
 				1F77618A22A8FC1800400878 /* Assets.xcassets */,
 				1F77618C22A8FC1800400878 /* Main.storyboard */,
 				1F77618F22A8FC1800400878 /* Info.plist */,
@@ -420,6 +435,7 @@
 				1F77619122A8FC1800400878 /* main.m in Sources */,
 				1F7761AB22A8FC2D00400878 /* GVWindowController.m in Sources */,
 				1F5DCB6122A95FBC008ECC24 /* GVApplicationDelegate.m in Sources */,
+				1F657A0722B3813E0027275D /* NSLabel.m in Sources */,
 				1F7761A922A8FC2D00400878 /* GVGraphArguments.m in Sources */,
 				1F7761A622A8FC2D00400878 /* GVExportViewController.m in Sources */,
 				1F7761A822A8FC2D00400878 /* GVGraph.m in Sources */,
@@ -428,7 +444,9 @@
 				1F7761AA22A8FC2D00400878 /* GVGraphDefaultAttributes.m in Sources */,
 				1F7761A522A8FC2D00400878 /* GVDocument.m in Sources */,
 				1F7761A422A8FC2D00400878 /* GVAttributeSchema.m in Sources */,
+				1F657A0422B37EAB0027275D /* MyMainController.m in Sources */,
 				1F77618922A8FC1600400878 /* AppDelegate.m in Sources */,
+				1F657A0A22B385620027275D /* GraphHelper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
