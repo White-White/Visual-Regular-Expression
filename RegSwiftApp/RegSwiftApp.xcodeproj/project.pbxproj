@@ -24,15 +24,29 @@
 		1F7761A922A8FC2D00400878 /* GVGraphArguments.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77614022A8F84900400878 /* GVGraphArguments.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1F7761AA22A8FC2D00400878 /* GVGraphDefaultAttributes.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77614822A8F84A00400878 /* GVGraphDefaultAttributes.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1F7761AB22A8FC2D00400878 /* GVWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77614A22A8F84A00400878 /* GVWindowController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		1F7761AD22A8FDFE00400878 /* libcdt.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F7760FA22A8F1A500400878 /* libcdt.5.dylib */; };
-		1F7761AE22A8FDFE00400878 /* libcdt.5.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1F7760FA22A8F1A500400878 /* libcdt.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1F7761AF22A8FDFE00400878 /* libcgraph.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F7760FC22A8F1D100400878 /* libcgraph.6.dylib */; };
-		1F7761B022A8FDFE00400878 /* libcgraph.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1F7760FC22A8F1D100400878 /* libcgraph.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1F7761B122A8FDFE00400878 /* libgvc.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F7760FE22A8F1DC00400878 /* libgvc.6.dylib */; };
-		1F7761B222A8FDFE00400878 /* libgvc.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1F7760FE22A8F1DC00400878 /* libgvc.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1F7761B422A9007300400878 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F77618A22A8FC1800400878 /* Assets.xcassets */; };
 		1F7761B522A9008200400878 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1F77618C22A8FC1800400878 /* Main.storyboard */; };
 		1F7761B622A9008400400878 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1F77618F22A8FC1800400878 /* Info.plist */; };
+		1FC1EE5222B64361001BAA85 /* libpathplan.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE4722B64361001BAA85 /* libpathplan.4.dylib */; };
+		1FC1EE5322B64361001BAA85 /* libcgraph.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE4822B64361001BAA85 /* libcgraph.6.dylib */; };
+		1FC1EE5422B64361001BAA85 /* libxdot.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE4922B64361001BAA85 /* libxdot.4.dylib */; };
+		1FC1EE5522B64361001BAA85 /* libgvc.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE4A22B64361001BAA85 /* libgvc.6.dylib */; };
+		1FC1EE5622B64361001BAA85 /* liblab_gamut.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE4B22B64361001BAA85 /* liblab_gamut.1.dylib */; };
+		1FC1EE5722B64361001BAA85 /* libgvpr.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE4C22B64361001BAA85 /* libgvpr.2.dylib */; };
+		1FC1EE5822B64361001BAA85 /* libgvplugin_dot_layout.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE4E22B64361001BAA85 /* libgvplugin_dot_layout.6.dylib */; };
+		1FC1EE5922B64361001BAA85 /* libgvplugin_core.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE4F22B64361001BAA85 /* libgvplugin_core.6.dylib */; };
+		1FC1EE5A22B64361001BAA85 /* libgvplugin_neato_layout.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE5022B64361001BAA85 /* libgvplugin_neato_layout.6.dylib */; };
+		1FC1EE5B22B64361001BAA85 /* libcdt.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE5122B64361001BAA85 /* libcdt.5.dylib */; };
+		1FC1EE5C22B6438F001BAA85 /* libgvplugin_dot_layout.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1FC1EE4E22B64361001BAA85 /* libgvplugin_dot_layout.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1FC1EE5D22B6438F001BAA85 /* libgvplugin_core.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1FC1EE4F22B64361001BAA85 /* libgvplugin_core.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1FC1EE5E22B6438F001BAA85 /* libgvplugin_neato_layout.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1FC1EE5022B64361001BAA85 /* libgvplugin_neato_layout.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1FC1EE5F22B6438F001BAA85 /* libcdt.5.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1FC1EE5122B64361001BAA85 /* libcdt.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1FC1EE6022B6438F001BAA85 /* libcgraph.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1FC1EE4822B64361001BAA85 /* libcgraph.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1FC1EE6122B6438F001BAA85 /* libgvc.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1FC1EE4A22B64361001BAA85 /* libgvc.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1FC1EE6222B6438F001BAA85 /* libgvpr.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1FC1EE4C22B64361001BAA85 /* libgvpr.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1FC1EE6322B6438F001BAA85 /* liblab_gamut.1.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1FC1EE4B22B64361001BAA85 /* liblab_gamut.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1FC1EE6422B6438F001BAA85 /* libpathplan.4.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1FC1EE4722B64361001BAA85 /* libpathplan.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1FC1EE6522B6438F001BAA85 /* libxdot.4.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1FC1EE4922B64361001BAA85 /* libxdot.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -42,10 +56,17 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				1FC1EE6122B6438F001BAA85 /* libgvc.6.dylib in Embed Libraries */,
+				1FC1EE5E22B6438F001BAA85 /* libgvplugin_neato_layout.6.dylib in Embed Libraries */,
+				1FC1EE6422B6438F001BAA85 /* libpathplan.4.dylib in Embed Libraries */,
+				1FC1EE6022B6438F001BAA85 /* libcgraph.6.dylib in Embed Libraries */,
+				1FC1EE5D22B6438F001BAA85 /* libgvplugin_core.6.dylib in Embed Libraries */,
+				1FC1EE5F22B6438F001BAA85 /* libcdt.5.dylib in Embed Libraries */,
+				1FC1EE5C22B6438F001BAA85 /* libgvplugin_dot_layout.6.dylib in Embed Libraries */,
 				1F5DCB7B22AA4B8B008ECC24 /* RegExSwift.framework in Embed Libraries */,
-				1F7761AE22A8FDFE00400878 /* libcdt.5.dylib in Embed Libraries */,
-				1F7761B222A8FDFE00400878 /* libgvc.6.dylib in Embed Libraries */,
-				1F7761B022A8FDFE00400878 /* libcgraph.6.dylib in Embed Libraries */,
+				1FC1EE6322B6438F001BAA85 /* liblab_gamut.1.dylib in Embed Libraries */,
+				1FC1EE6222B6438F001BAA85 /* libgvpr.2.dylib in Embed Libraries */,
+				1FC1EE6522B6438F001BAA85 /* libxdot.4.dylib in Embed Libraries */,
 			);
 			name = "Embed Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -64,9 +85,6 @@
 		1F657A0622B3813E0027275D /* NSLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSLabel.m; sourceTree = "<group>"; };
 		1F657A0822B385620027275D /* GraphHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GraphHelper.h; sourceTree = "<group>"; };
 		1F657A0922B385620027275D /* GraphHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GraphHelper.m; sourceTree = "<group>"; };
-		1F7760FA22A8F1A500400878 /* libcdt.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcdt.5.dylib; sourceTree = "<group>"; };
-		1F7760FC22A8F1D100400878 /* libcgraph.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcgraph.6.dylib; sourceTree = "<group>"; };
-		1F7760FE22A8F1DC00400878 /* libgvc.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libgvc.6.dylib; sourceTree = "<group>"; };
 		1F77610222A8F80B00400878 /* gvcext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gvcext.h; sourceTree = "<group>"; };
 		1F77610322A8F80B00400878 /* gvplugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gvplugin.h; sourceTree = "<group>"; };
 		1F77610422A8F80B00400878 /* gvplugin_textlayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gvplugin_textlayout.h; sourceTree = "<group>"; };
@@ -147,6 +165,16 @@
 		1F77619022A8FC1800400878 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		1F77619222A8FC1800400878 /* MacApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacApp.entitlements; sourceTree = "<group>"; };
 		1F7761AC22A8FCC300400878 /* Prefix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Prefix.h; sourceTree = "<group>"; };
+		1FC1EE4722B64361001BAA85 /* libpathplan.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libpathplan.4.dylib; sourceTree = "<group>"; };
+		1FC1EE4822B64361001BAA85 /* libcgraph.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcgraph.6.dylib; sourceTree = "<group>"; };
+		1FC1EE4922B64361001BAA85 /* libxdot.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libxdot.4.dylib; sourceTree = "<group>"; };
+		1FC1EE4A22B64361001BAA85 /* libgvc.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libgvc.6.dylib; sourceTree = "<group>"; };
+		1FC1EE4B22B64361001BAA85 /* liblab_gamut.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = liblab_gamut.1.dylib; sourceTree = "<group>"; };
+		1FC1EE4C22B64361001BAA85 /* libgvpr.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libgvpr.2.dylib; sourceTree = "<group>"; };
+		1FC1EE4E22B64361001BAA85 /* libgvplugin_dot_layout.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libgvplugin_dot_layout.6.dylib; sourceTree = "<group>"; };
+		1FC1EE4F22B64361001BAA85 /* libgvplugin_core.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libgvplugin_core.6.dylib; sourceTree = "<group>"; };
+		1FC1EE5022B64361001BAA85 /* libgvplugin_neato_layout.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libgvplugin_neato_layout.6.dylib; sourceTree = "<group>"; };
+		1FC1EE5122B64361001BAA85 /* libcdt.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcdt.5.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -154,10 +182,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FC1EE5922B64361001BAA85 /* libgvplugin_core.6.dylib in Frameworks */,
+				1FC1EE5222B64361001BAA85 /* libpathplan.4.dylib in Frameworks */,
+				1FC1EE5422B64361001BAA85 /* libxdot.4.dylib in Frameworks */,
+				1FC1EE5822B64361001BAA85 /* libgvplugin_dot_layout.6.dylib in Frameworks */,
+				1FC1EE5322B64361001BAA85 /* libcgraph.6.dylib in Frameworks */,
+				1FC1EE5722B64361001BAA85 /* libgvpr.2.dylib in Frameworks */,
+				1FC1EE5522B64361001BAA85 /* libgvc.6.dylib in Frameworks */,
+				1FC1EE5B22B64361001BAA85 /* libcdt.5.dylib in Frameworks */,
+				1FC1EE5622B64361001BAA85 /* liblab_gamut.1.dylib in Frameworks */,
+				1FC1EE5A22B64361001BAA85 /* libgvplugin_neato_layout.6.dylib in Frameworks */,
 				1F5DCB7A22AA4B8B008ECC24 /* RegExSwift.framework in Frameworks */,
-				1F7761AD22A8FDFE00400878 /* libcdt.5.dylib in Frameworks */,
-				1F7761B122A8FDFE00400878 /* libgvc.6.dylib in Frameworks */,
-				1F7761AF22A8FDFE00400878 /* libcgraph.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -204,10 +239,15 @@
 		1F7760F922A8F18700400878 /* Clibs */ = {
 			isa = PBXGroup;
 			children = (
+				1FC1EE4D22B64361001BAA85 /* graphviz */,
+				1FC1EE5122B64361001BAA85 /* libcdt.5.dylib */,
+				1FC1EE4822B64361001BAA85 /* libcgraph.6.dylib */,
+				1FC1EE4A22B64361001BAA85 /* libgvc.6.dylib */,
+				1FC1EE4C22B64361001BAA85 /* libgvpr.2.dylib */,
+				1FC1EE4B22B64361001BAA85 /* liblab_gamut.1.dylib */,
+				1FC1EE4722B64361001BAA85 /* libpathplan.4.dylib */,
+				1FC1EE4922B64361001BAA85 /* libxdot.4.dylib */,
 				1F77610022A8F80B00400878 /* headers */,
-				1F7760FE22A8F1DC00400878 /* libgvc.6.dylib */,
-				1F7760FA22A8F1A500400878 /* libcdt.5.dylib */,
-				1F7760FC22A8F1D100400878 /* libcgraph.6.dylib */,
 			);
 			path = Clibs;
 			sourceTree = "<group>";
@@ -360,6 +400,16 @@
 			path = MacApp;
 			sourceTree = "<group>";
 		};
+		1FC1EE4D22B64361001BAA85 /* graphviz */ = {
+			isa = PBXGroup;
+			children = (
+				1FC1EE4E22B64361001BAA85 /* libgvplugin_dot_layout.6.dylib */,
+				1FC1EE4F22B64361001BAA85 /* libgvplugin_core.6.dylib */,
+				1FC1EE5022B64361001BAA85 /* libgvplugin_neato_layout.6.dylib */,
+			);
+			path = graphviz;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -371,6 +421,7 @@
 				1F77618222A8FC1600400878 /* Frameworks */,
 				1F77618322A8FC1600400878 /* Resources */,
 				1F7761B322A8FDFE00400878 /* Embed Libraries */,
+				1FC1EE4622B626C6001BAA85 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -426,6 +477,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1FC1EE4622B626C6001BAA85 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "echo $LD_RUNPATH_SEARCH_PATHS\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1F77618122A8FC1600400878 /* Sources */ = {
@@ -593,8 +664,9 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/RegSwiftApp/Clibs",
+					"$(PROJECT_DIR)/RegSwiftApp/Clibs/graphviz",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = Whites.MacApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -616,8 +688,9 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/RegSwiftApp/Clibs",
+					"$(PROJECT_DIR)/RegSwiftApp/Clibs/graphviz",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = Whites.MacApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
