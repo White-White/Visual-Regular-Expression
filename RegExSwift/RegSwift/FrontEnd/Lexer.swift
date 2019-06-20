@@ -9,41 +9,63 @@
 import Foundation
 
 enum LexemeType {
-    case Functional
+    
+    /*
+     //    case Dot
+     dot is represented by
+     */
+    
+    case Alternation                // |
+    
+    //quantifier
+    case Star                       // *
+    case Plus                       // +
+    //    case questionMark
+    case CurlyStart                 // {
+    case CurlyEnd                   // }
+    case Comma                      // ,
+    
+    //class
+    case Hyphen                     // -
+    case ClassStart                 // [
+    case ClassEnd                   // ]
+    
+    //group
+    case GroupStart                 // (
+    case GroupEnd                   // )
+    
+    //non functional
     case Literal
-}
-
-protocol Lexeme {
-    var lexemeType: LexemeType { get }
-}
-
-//特殊控制字符
-struct FunctionalLexeme: Lexeme {
+    case LiteralClass
     
-    let lexemeType = LexemeType.Functional
-    
-    enum FunctionalLexemeSubType {
-        case Dot // .
-        case Alternation // | (pipe)
-        case Star // *
-        case Plus // +
-        case Hyphen
-        case ClassStart // [
-        case ClassEnd // ]
-        case GroupStart // (
-        case GroupEnd // )
+    static func allFunctionalCharacters() -> String {
+        return ".|*+-[](){},"
     }
-    
-    let subType: FunctionalLexemeSubType
 }
 
-//Literal
-struct LiteralLexeme: Lexeme {
-    let lexemeType = LexemeType.Literal
+class Lexeme {
+    let lexemeType: LexemeType
+    init(type: LexemeType) {
+        self.lexemeType = type
+    }
+}
+
+class LiteralLexeme: Lexeme {
     let value: Character
+    init(value: Character) {
+        self.value = value
+        super.init(type: .Literal)
+    }
 }
 
-//词法分析
+class ClassLexeme: Lexeme {
+    let literalClass: LiteralsClass
+    init(_ lclass: LiteralsClass) {
+        self.literalClass = lclass
+        super.init(type: .LiteralClass)
+    }
+}
+
 class Lexer {
     private var characters: [Character]
     private var currentIndex = 0
@@ -59,63 +81,64 @@ class Lexer {
             ls.append(nextLexeme)
         }
         
-        //重置
+        //reset
         currentIndex = 0
         return ls
     }
     
-    private func lexemeFrom(_ character: Character) -> Lexeme {
-        switch character {
-        case "|":
-            return FunctionalLexeme(subType: .Alternation)
-        case "*":
-            return FunctionalLexeme(subType: .Star)
-        case ".":
-            return FunctionalLexeme(subType: .Dot)
-        case "+":
-            return FunctionalLexeme(subType: .Plus)
-        case "-":
-            return FunctionalLexeme(subType: .Hyphen)
-        case "[":
-            return FunctionalLexeme(subType: .ClassStart)
-        case "]":
-            return FunctionalLexeme(subType: .ClassEnd)
-        case "(":
-            return FunctionalLexeme(subType: .GroupStart)
-        case ")":
-            return FunctionalLexeme(subType: .GroupEnd)
-        default:
-            return LiteralLexeme(value: character)
-        }
-    }
-    
-    private func lexemeFromEscaped(_ character: Character) throws -> Lexeme {
-        if "|*.+[]()\\".contains(character) {
-            return LiteralLexeme(value: character)
-        } else {
-            throw RegExSwiftError("非法的被逃逸字符")
-        }
-    }
-    
     private func nextLexeme() throws -> Lexeme? {
         guard let nextCharacter = self.nextCharacter() else { return nil }
-        //逃逸字符
+        
+        //escaping highest precedence
         if (nextCharacter == "\\") {
-            guard let peakCharacter = self.nextCharacter() else { throw RegExSwiftError("反斜杠不能是最后一个字符") }
-            return try lexemeFromEscaped(peakCharacter)
+            guard let peakCharacter = self.nextCharacter() else {
+                throw RegExSwiftError.fromType(.LastCharEscape)
+            }
+            if let literalClass = LiteralsClass(fromPreset: peakCharacter) {
+                return ClassLexeme(literalClass)
+            } else if LexemeType.allFunctionalCharacters().contains(peakCharacter) {
+                return LiteralLexeme(value: peakCharacter)
+            } else {
+                throw RegExSwiftError.fromType(RegExSwiftErrorType.illegalEscape(peakCharacter))
+            }
         } else {
             let nextLexeme = lexemeFrom(nextCharacter)
             return nextLexeme
         }
     }
     
-    //回滚
-    private func rollBack() throws {
-        guard currentIndex > 0 else { throw RegExSwiftError("Lexer回退超过数组边界") }
-        currentIndex -= 1
+    private func lexemeFrom(_ character: Character) -> Lexeme {
+        switch character {
+        case "|":
+            return Lexeme(type: .Alternation)
+        case "*":
+            return Lexeme(type: .Star)
+        case ".":
+            let literalClass = LiteralsClass(type: .Exclude, characters: Array("\n"))
+            return ClassLexeme(literalClass)
+        case "+":
+            return Lexeme(type: .Plus)
+        case "-":
+            return Lexeme(type: .Hyphen)
+        case "[":
+            return Lexeme(type: .ClassStart)
+        case "]":
+            return Lexeme(type: .ClassEnd)
+        case "(":
+            return Lexeme(type: .GroupStart)
+        case ")":
+            return Lexeme(type: .GroupEnd)
+        case "{":
+            return Lexeme(type: .CurlyStart)
+        case "}":
+            return Lexeme(type: .CurlyEnd)
+        case ",":
+            return Lexeme(type: .Comma)
+        default:
+            return LiteralLexeme(value: character)
+        }
     }
     
-    //下一个字符
     private func nextCharacter() -> Character? {
         guard currentIndex < characters.count else { return nil }
         let nextCharacter = characters[currentIndex]

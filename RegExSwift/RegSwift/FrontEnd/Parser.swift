@@ -8,88 +8,6 @@
 
 import Foundation
 
-enum SemanticUnitType {
-    case literalLexemeSequence //普通字符序列
-    case functionalSymbol //控制符号
-    case oneGroup
-    case oneClass
-}
-
-protocol SemanticUnit {
-    var semanticUnitType: SemanticUnitType { get }
-}
-
-struct LiteralSequenceSemantic: SemanticUnit {
-    var semanticUnitType = SemanticUnitType.literalLexemeSequence
-    let literals: [Character]
-    
-    init(lexemes: [LiteralLexeme]) {
-        self.literals = lexemes.map { $0.value }
-    }
-}
-
-struct GroupExpressionSemantic: SemanticUnit {
-    var semanticUnitType = SemanticUnitType.oneGroup
-    let semanticUnits: [SemanticUnit]
-    init(semanticUnits: [SemanticUnit]) {
-        self.semanticUnits = semanticUnits
-    }
-}
-
-struct ClassExpressionSemantic: SemanticUnit {
-    var semanticUnitType = SemanticUnitType.oneClass
-    let characterSet: Set<Character>
-    
-    init(lexemes: [Lexeme]) throws {
-        var ite = lexemes.makeIterator()
-        
-        var lastLexeme: Lexeme?
-        var characterSetBuffer: Set<Character> = []
-        
-        while let lexeme = ite.next() {
-            switch lexeme.lexemeType {
-            case .Functional:
-                guard let functionLexeme = lexeme as? FunctionalLexeme else { fatalError() }
-                switch functionLexeme.subType {
-                case .Hyphen:
-                    let peekLexeme = ite.next()
-                    if let nextLiteralLexeme = peekLexeme as? LiteralLexeme, let previousLiteralLexeme = lastLexeme as? LiteralLexeme {
-                        let charactersBetween = try Parser.createLiteralsBetween(startLiteralLexeme: previousLiteralLexeme, endLiteralLexeme: nextLiteralLexeme)
-                        characterSetBuffer.formUnion(charactersBetween)
-                    } else {
-                        throw RegExSwiftError("ClassSyntaxError: Invalid symbol between the hyphen")
-                    }
-                    lastLexeme = peekLexeme as Lexeme?
-                default:
-                    lastLexeme = lexeme //ignore
-                }
-            case .Literal:
-                characterSetBuffer.insert((lexeme as! LiteralLexeme).value)
-                lastLexeme = lexeme
-            }
-        }
-        
-        self.characterSet = characterSetBuffer
-    }
-}
-
-struct FunctionalSemantic: SemanticUnit {
-    var semanticUnitType = SemanticUnitType.functionalSymbol
-    
-    enum FunctionalSemanticSubType {
-        case Dot // .
-        case Alternation // | (pipe)
-        case Star // *
-        case Plus // +
-    }
-    
-    let functionalSemanticType: FunctionalSemanticSubType
-    
-    init(_ functionalSemanticType: FunctionalSemanticSubType) {
-        self.functionalSemanticType = functionalSemanticType
-    }
-}
-
 class Parser {
     private let lexemes: [Lexeme]
     private var currentIndex: Int = 0
@@ -107,61 +25,47 @@ class Parser {
     
     private func createSemanticUnits() throws -> [SemanticUnit] {
         var semanticUnitStack: [SemanticUnit] = []
-        var literalLexemeStack: [LiteralLexeme] = []
-        
-        func _dumpLexemesToSemanticStack() {
-            if !literalLexemeStack.isEmpty {
-                let literalSequence = LiteralSequenceSemantic(lexemes: literalLexemeStack)
-                semanticUnitStack.append(literalSequence)
-                literalLexemeStack.removeAll()
-            }
-        }
-        
-        while let nextLexeme = self.nextLexeme() {
-            switch nextLexeme.lexemeType {
-            case .Functional:
-                let nextFunctionLexeme = nextLexeme as! FunctionalLexeme
-                switch nextFunctionLexeme.subType {
-                case .Dot:
-                    _dumpLexemesToSemanticStack()
-                    semanticUnitStack.append(FunctionalSemantic(.Dot))
-                case .Plus:
-                    _dumpLexemesToSemanticStack()
-                    semanticUnitStack.append(FunctionalSemantic(.Plus))
-                case .Alternation:
-                    _dumpLexemesToSemanticStack()
-                    semanticUnitStack.append(FunctionalSemantic(.Alternation))
-                case .Star:
-                    _dumpLexemesToSemanticStack()
-                    semanticUnitStack.append(FunctionalSemantic(.Star))
-                case .Hyphen:
-                    throw RegExSwiftError("SyntaxError: unexpected -")
-                case .GroupStart:
-                    _dumpLexemesToSemanticStack()
-                    let semanticUnitsOfThisGroup = try self.createSemanticUnits()
-                    guard !semanticUnitsOfThisGroup.isEmpty else { continue }
-                    let groupExpression = GroupExpressionSemantic(semanticUnits: semanticUnitsOfThisGroup)
-                    semanticUnitStack.append(groupExpression)
-                case .GroupEnd:
-                    _dumpLexemesToSemanticStack()
-                    return semanticUnitStack
-                case .ClassStart:
-                    _dumpLexemesToSemanticStack()
-                    semanticUnitStack.append(try self.createClassExpression())
-                case .ClassEnd:
-                    throw RegExSwiftError("SyntaxError: unexpected ]")
-                }
+
+        while let lexeme = self.nextLexeme() {
+            switch lexeme.lexemeType {
             case .Literal:
-                literalLexemeStack.append(nextLexeme as! LiteralLexeme)
+                semanticUnitStack.append(LiteralSemantic(lexeme: lexeme as! LiteralLexeme))
+            case .Alternation:
+                semanticUnitStack.append(SemanticUnit(type: .Alternation))
+            case .Plus:
+                let qMeni = QuantifierMenifest(lowerBound: 1, higherBound: UInt.max)
+                semanticUnitStack.append(SemanticUnit(type: .Quantifier(qMeni: qMeni)))
+            case .Hyphen:
+                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol("-"))
+            case .Star:
+                let qMeni = QuantifierMenifest(lowerBound: 0, higherBound: UInt.max)
+                semanticUnitStack.append(SemanticUnit(type: .Quantifier(qMeni: qMeni)))
+            case .GroupStart:
+                let semanticUnitsOfThisGroup = try self.createSemanticUnits()
+                guard !semanticUnitsOfThisGroup.isEmpty else { continue }
+                let groupExpression = GroupSemantic(semanticUnits: semanticUnitsOfThisGroup)
+                semanticUnitStack.append(groupExpression)
+            case .GroupEnd:
+                return semanticUnitStack
+            case .ClassStart:
+                semanticUnitStack.append(try self.createClassSemantic())
+            case .ClassEnd:
+                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol("]"))
+            case .Comma:
+                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol(","))
+            case .CurlyStart:
+                let quanti = try self.createQuantiferInCurly()
+                semanticUnitStack.append(SemanticUnit(type: .Quantifier(qMeni: quanti)))
+            case .CurlyEnd:
+                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol("}"))
+            case .LiteralClass:
+                semanticUnitStack.append(ClassSemantic(classLexeme: lexeme as! ClassLexeme))
             }
         }
-        
-        _dumpLexemesToSemanticStack()
-        
         return semanticUnitStack
     }
     
-    private func createClassExpression() throws -> ClassExpressionSemantic {
+    private func createClassSemantic() throws -> ClassSemantic {
         var lexemeBuffer: [Lexeme] = []
         var numOfClassStartEncountered: Int = 0
         
@@ -169,26 +73,62 @@ class Parser {
             switch nextLexeme.lexemeType {
             case .Literal:
                 lexemeBuffer.append(nextLexeme)
-            case .Functional:
-                let nextFunctionLexeme = nextLexeme as! FunctionalLexeme
-                switch nextFunctionLexeme.subType {
-                case .Hyphen:
-                    lexemeBuffer.append(nextLexeme)
-                case .ClassStart:
-                    numOfClassStartEncountered += 1
-                case .ClassEnd:
-                    if (numOfClassStartEncountered == 0) {
-                        return try ClassExpressionSemantic(lexemes: lexemeBuffer)
-                    } else {
-                        numOfClassStartEncountered -= 1
-                    }
-                default:
-                    continue //ignore
+            case .Hyphen:
+                lexemeBuffer.append(nextLexeme)
+            case .ClassStart:
+                numOfClassStartEncountered += 1
+            case .ClassEnd:
+                if (numOfClassStartEncountered == 0) {
+                    return try ClassSemantic(lexemesInsideClassSymbol: lexemeBuffer)
+                } else {
+                    numOfClassStartEncountered -= 1
                 }
+            default:
+                break // ignore
             }
         }
         
-        throw RegExSwiftError("ClassSyntaxError: number of [ and ] not matched")
+        throw RegExSwiftError.fromType(RegExSwiftErrorType.unmatchedClassSymbol)
+    }
+    
+    private func createQuantiferInCurly() throws -> QuantifierMenifest {
+        var lexemeBuffer: [LiteralLexeme] = []
+        var lowerBound: UInt?
+        var hasMetComma: Bool = false
+        
+        while let lexeme = self.nextLexeme() {
+            switch lexeme.lexemeType {
+            case .Literal:
+                let literalLexeme = lexeme as! LiteralLexeme
+                guard LiteralsClass.digits.contains(literalLexeme.value) else {
+                    throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
+                }
+                lexemeBuffer.append(literalLexeme)
+            case .Comma:
+                guard !hasMetComma else {
+                    throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
+                }
+                hasMetComma = true
+                let stringLeftComma = String(lexemeBuffer.map { $0.value })
+                if let lower = UInt(stringLeftComma) {
+                    lowerBound = lower
+                    lexemeBuffer.removeAll()
+                } else {
+                    throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
+                }
+            case .CurlyEnd:
+                guard let lowerBound = lowerBound else {
+                    throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
+                }
+                if let higher = UInt(String(lexemeBuffer.map { $0.value })) {
+                    return QuantifierMenifest(lowerBound: lowerBound, higherBound: higher)
+                } else {
+                    return QuantifierMenifest(lowerBound: lowerBound, higherBound: UInt.max)
+                }
+            default:
+                throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
+            }
+        }
     }
     
     
@@ -204,25 +144,19 @@ class Parser {
         return self.lexemes[targetIndex]
     }
     
-    //回滚
-    private func rollBack() throws {
-        guard currentIndex > 0 else { throw RegExSwiftError("Parser回退超过数组边界") }
-        currentIndex -= 1
-    }
-    
     //helper
-    static func isLexemesEqual(_ l: Lexeme, r: Lexeme) -> Bool {
-        switch (l.lexemeType, r.lexemeType) {
-        case (LexemeType.Literal, LexemeType.Literal):
-            guard let l = l as? LiteralLexeme, let r = r as? LiteralLexeme else { return false }
-            return l.value == r.value
-        case (LexemeType.Functional, LexemeType.Functional):
-            guard let l = l as? FunctionalLexeme, let r = r as? FunctionalLexeme else { return false }
-            return l.subType == r.subType
-        default:
-            return false
-        }
-    }
+//    static func isLexemesEqual(_ l: Lexeme, r: Lexeme) -> Bool {
+//        switch (l.lexemeType, r.lexemeType) {
+//        case (LexemeType.Literal, LexemeType.Literal):
+//            guard let l = l as? LiteralLexeme, let r = r as? LiteralLexeme else { return false }
+//            return l.value == r.value
+//        case (LexemeType.Functional, LexemeType.Functional):
+//            guard let l = l as? FunctionalLexeme, let r = r as? FunctionalLexeme else { return false }
+//            return l.subType == r.subType
+//        default:
+//            return false
+//        }
+//    }
     
     static func createLiteralsBetween(startLiteralLexeme: LiteralLexeme, endLiteralLexeme: LiteralLexeme) throws -> [Character] {
         
