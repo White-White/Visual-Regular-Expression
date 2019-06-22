@@ -27,6 +27,11 @@
 		1F7761B422A9007300400878 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F77618A22A8FC1800400878 /* Assets.xcassets */; };
 		1F7761B522A9008200400878 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1F77618C22A8FC1800400878 /* Main.storyboard */; };
 		1F7761B622A9008400400878 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1F77618F22A8FC1800400878 /* Info.plist */; };
+		1F8B8D1922BE87A1004C50F6 /* config6 in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1F8B8D1722BE834D004C50F6 /* config6 */; };
+		1F8B8D1C22BE8C1D004C50F6 /* libgvplugin_gd.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F8B8D1A22BE8C1D004C50F6 /* libgvplugin_gd.6.dylib */; };
+		1F8B8D1D22BE8C1D004C50F6 /* libgvplugin_quartz.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F8B8D1B22BE8C1D004C50F6 /* libgvplugin_quartz.6.dylib */; };
+		1F8B8D1E22BE8C2E004C50F6 /* libgvplugin_gd.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1F8B8D1A22BE8C1D004C50F6 /* libgvplugin_gd.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1F8B8D1F22BE8C2E004C50F6 /* libgvplugin_quartz.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1F8B8D1B22BE8C1D004C50F6 /* libgvplugin_quartz.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1FC1EE5222B64361001BAA85 /* libpathplan.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE4722B64361001BAA85 /* libpathplan.4.dylib */; };
 		1FC1EE5322B64361001BAA85 /* libcgraph.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE4822B64361001BAA85 /* libcgraph.6.dylib */; };
 		1FC1EE5422B64361001BAA85 /* libxdot.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC1EE4922B64361001BAA85 /* libxdot.4.dylib */; };
@@ -56,6 +61,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				1F8B8D1E22BE8C2E004C50F6 /* libgvplugin_gd.6.dylib in Embed Libraries */,
+				1F8B8D1F22BE8C2E004C50F6 /* libgvplugin_quartz.6.dylib in Embed Libraries */,
+				1F8B8D1922BE87A1004C50F6 /* config6 in Embed Libraries */,
 				1FC1EE6122B6438F001BAA85 /* libgvc.6.dylib in Embed Libraries */,
 				1FC1EE5E22B6438F001BAA85 /* libgvplugin_neato_layout.6.dylib in Embed Libraries */,
 				1FC1EE6422B6438F001BAA85 /* libpathplan.4.dylib in Embed Libraries */,
@@ -165,6 +173,9 @@
 		1F77619022A8FC1800400878 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		1F77619222A8FC1800400878 /* MacApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacApp.entitlements; sourceTree = "<group>"; };
 		1F7761AC22A8FCC300400878 /* Prefix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Prefix.h; sourceTree = "<group>"; };
+		1F8B8D1722BE834D004C50F6 /* config6 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = config6; sourceTree = "<group>"; };
+		1F8B8D1A22BE8C1D004C50F6 /* libgvplugin_gd.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libgvplugin_gd.6.dylib; sourceTree = "<group>"; };
+		1F8B8D1B22BE8C1D004C50F6 /* libgvplugin_quartz.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libgvplugin_quartz.6.dylib; sourceTree = "<group>"; };
 		1FC1EE4722B64361001BAA85 /* libpathplan.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libpathplan.4.dylib; sourceTree = "<group>"; };
 		1FC1EE4822B64361001BAA85 /* libcgraph.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcgraph.6.dylib; sourceTree = "<group>"; };
 		1FC1EE4922B64361001BAA85 /* libxdot.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libxdot.4.dylib; sourceTree = "<group>"; };
@@ -184,6 +195,7 @@
 			files = (
 				1FC1EE5922B64361001BAA85 /* libgvplugin_core.6.dylib in Frameworks */,
 				1FC1EE5222B64361001BAA85 /* libpathplan.4.dylib in Frameworks */,
+				1F8B8D1D22BE8C1D004C50F6 /* libgvplugin_quartz.6.dylib in Frameworks */,
 				1FC1EE5422B64361001BAA85 /* libxdot.4.dylib in Frameworks */,
 				1FC1EE5822B64361001BAA85 /* libgvplugin_dot_layout.6.dylib in Frameworks */,
 				1FC1EE5322B64361001BAA85 /* libcgraph.6.dylib in Frameworks */,
@@ -191,6 +203,7 @@
 				1FC1EE5522B64361001BAA85 /* libgvc.6.dylib in Frameworks */,
 				1FC1EE5B22B64361001BAA85 /* libcdt.5.dylib in Frameworks */,
 				1FC1EE5622B64361001BAA85 /* liblab_gamut.1.dylib in Frameworks */,
+				1F8B8D1C22BE8C1D004C50F6 /* libgvplugin_gd.6.dylib in Frameworks */,
 				1FC1EE5A22B64361001BAA85 /* libgvplugin_neato_layout.6.dylib in Frameworks */,
 				1F5DCB7A22AA4B8B008ECC24 /* RegExSwift.framework in Frameworks */,
 			);
@@ -403,9 +416,12 @@
 		1FC1EE4D22B64361001BAA85 /* graphviz */ = {
 			isa = PBXGroup;
 			children = (
+				1F8B8D1722BE834D004C50F6 /* config6 */,
 				1FC1EE4E22B64361001BAA85 /* libgvplugin_dot_layout.6.dylib */,
 				1FC1EE4F22B64361001BAA85 /* libgvplugin_core.6.dylib */,
 				1FC1EE5022B64361001BAA85 /* libgvplugin_neato_layout.6.dylib */,
+				1F8B8D1A22BE8C1D004C50F6 /* libgvplugin_gd.6.dylib */,
+				1F8B8D1B22BE8C1D004C50F6 /* libgvplugin_quartz.6.dylib */,
 			);
 			path = graphviz;
 			sourceTree = "<group>";

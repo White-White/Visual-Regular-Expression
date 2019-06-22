@@ -8,9 +8,20 @@
 
 import Foundation
 
+struct StateNameCreator {
+    var start = 0
+    mutating func nextName() -> String {
+        let temp = start
+        start += 1
+        return "s\(temp)"
+    }
+}
+
 public class RegSwift: NSObject {
     private let headState: BaseState
     private let parrern: String
+    
+    static var nameCreator: StateNameCreator?
     
     @objc
     public init(pattern: String) throws {
@@ -60,6 +71,11 @@ public class RegSwift: NSObject {
 
 //MARK: - Nodes
 extension RegSwift {
+    @objc
+    public static func reset() {
+        RegSwift.nameCreator = StateNameCreator()
+    }
+    
     @objc
     public func getNodeHead() -> GraphNode {
         return self.headState as GraphNode

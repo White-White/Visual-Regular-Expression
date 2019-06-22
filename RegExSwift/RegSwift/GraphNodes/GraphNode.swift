@@ -18,7 +18,15 @@ public protocol GraphNode {
 
 extension BaseState: GraphNode {
 //    var nodeName: String { return self.stateName }
-    var nodeName: String { return self.debugDescription }
+    var nodeName: String {
+        if let stateName = self.stateName {
+            return stateName
+        } else {
+            self.stateName = RegSwift.nameCreator!.nextName()
+            return self.stateName!
+        }
+//        return self.debugDescription
+    }
     var inputCharactersDescription: String { return self.inputSetDescription ?? "NEEDFIX" }
     var highLighted: Bool { return false }
     

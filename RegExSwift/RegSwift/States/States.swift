@@ -42,6 +42,7 @@ class ValueState: BaseState {
         self.character = c
         self.out = AcceptState.shared
         super.init(.value)
+        self.inputSetDescription = String(c)
     }
     
     override func forwardWithEmptyInput() -> [BaseState] {
@@ -92,6 +93,7 @@ class SplitState: BaseState {
         self.primaryOut = primaryOut
         self.secondaryOut = secondaryOut
         super.init(.split)
+        self.inputSetDescription = "ε"
     }
     
     override func forwardWithEmptyInput() -> [BaseState] {

@@ -9,10 +9,19 @@
 #import "GraphHelper.h"
 #import "cgraph.h"
 #import "gvc.h"
+#import "gvplugin.h"
 
 @implementation GraphHelper
 
 + (NSString *)createPNGWithRegularExpression: (NSString *)regularExpression error: (NSError * _Nullable __autoreleasing *)error {
+    
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSURL *librariesDirURL = [[[NSBundle mainBundle] bundleURL] URLByAppendingPathComponent:@"Contents/Frameworks/" isDirectory:YES];
+        int ret = setenv("GVBINDIR", (char*)[[librariesDirURL path] UTF8String], 1);
+    });
+    
+    [RegSwift reset];
     RegSwift *regSwift = [[RegSwift alloc] initWithPattern:regularExpression error:error];
     if (*error) { return nil; }
     id<GraphNode> headNode = [regSwift getNodeHead];
@@ -44,6 +53,7 @@
     NSLog(@"\n");
 #endif
     GVC_t *gvc = gvContext();
+    
     gvLayout(gvc, g, "dot");
     FILE *thePNG = fopen([path cStringUsingEncoding:NSUTF8StringEncoding], "w+");
     gvRender(gvc, g, "png", thePNG);
