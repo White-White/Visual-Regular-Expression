@@ -20,7 +20,7 @@ enum LexemeType {
     //quantifier
     case Star                       // *
     case Plus                       // +
-    //    case questionMark
+    case QuestionMark               // ?
     case CurlyStart                 // {
     case CurlyEnd                   // }
     case Comma                      // ,
@@ -40,6 +40,37 @@ enum LexemeType {
     
     static func allFunctionalCharacters() -> String {
         return ".|*+-[](){},"
+    }
+    
+    var readableCharDesk: Character {
+        switch self {
+        case .Alternation:
+            return "|"
+        case .Star:
+            return "*"
+        case .Plus:
+            return "+"
+        case .QuestionMark:
+            return "?"
+        case .CurlyStart:
+            return "{"
+        case .CurlyEnd:
+            return "}"
+        case .Comma:
+            return ","
+        case .Hyphen:
+            return "-"
+        case .ClassStart:
+            return "["
+        case .ClassEnd:
+            return "]"
+        case .GroupStart:
+            return "("
+        case .GroupEnd:
+            return ")"
+        default:
+            return "!"
+        }
     }
 }
 
@@ -114,10 +145,12 @@ class Lexer {
         case "*":
             return Lexeme(type: .Star)
         case ".":
-            let literalClass = LiteralsClass(type: .Exclude, characters: Array("\n"))
+            let literalClass = LiteralsClass(type: .Exclude, characters: Set(arrayLiteral: "\n"))
             return ClassLexeme(literalClass)
         case "+":
             return Lexeme(type: .Plus)
+        case "?":
+            return Lexeme(type: .QuestionMark)
         case "-":
             return Lexeme(type: .Hyphen)
         case "[":

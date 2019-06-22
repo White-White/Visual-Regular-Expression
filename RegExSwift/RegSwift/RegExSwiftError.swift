@@ -19,6 +19,10 @@ import Foundation
     case unexpectedSymbol(Character)
     case unmatchedClassSymbol
     case syntaxErrorInCurly
+    
+    //syntax error
+    case invalidOperand(s: String, isLeft: Bool)
+    case invaludOperandAroundAlternation
 }
 
 public class RegExSwiftError: CustomNSError {
@@ -44,6 +48,10 @@ public class RegExSwiftError: CustomNSError {
             return RegExSwiftError("number of [ and ] not matched")
         case .syntaxErrorInCurly:
             return RegExSwiftError("Syntax error in curly")
+        case .invalidOperand(let s, let isL):
+            return RegExSwiftError("Symbol at \(isL ? "left" : "right") side of \(s) is invalid.")
+        case .invaludOperandAroundAlternation:
+            return RegExSwiftError("Symbols around | are invalid.")
         }
     }
 }

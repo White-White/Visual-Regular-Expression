@@ -9,39 +9,22 @@
 import Foundation
 
 class RepeatChecker {
-    private let lowerBound: UInt
-    private let upperBound: UInt
+    private let quantifier: QuantifierMenifest
     private var repeatCount: UInt = 0
     
-    private init(l: UInt, u: UInt) {
-        self.lowerBound = l
-        self.upperBound = u
-    }
-    
-    convenience init(with functionalSemanticUnit: FunctionalSemantic) {
-        switch functionalSemanticUnit.functionalSemanticType {
-        case .Plus:
-            self.init(l: 1, u: UInt.max)
-        case .Star:
-            self.init(l: 0, u: UInt.max)
-        default:
-            fatalError() //impossible case.
-        }
+    init(with quantifier: QuantifierMenifest) {
+        self.quantifier = quantifier
     }
     
     func repeatCriteriaHasBeenMet() -> Bool {
-        return repeatCount >= self.lowerBound && repeatCount <= self.upperBound
+        return repeatCount >= quantifier.lowerBound && repeatCount <= quantifier.higherBound
     }
     
     func canRepeat() -> Bool {
-        return self.repeatCount < self.upperBound
+        return self.repeatCount < quantifier.higherBound
     }
 
     func forward() {
         repeatCount += 1
-    }
-    
-    func allowZeroRepeat() -> Bool {
-        return self.lowerBound == 0
     }
 }

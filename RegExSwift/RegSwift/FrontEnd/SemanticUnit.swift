@@ -15,10 +15,20 @@ struct QuantifierMenifest {
 
 enum SemanticUnitType {
     case Literal
-    case Quantifier(qMeni: QuantifierMenifest)
+    case Repeating       // * + {m,n} ?
     case Group           // ()
     case Class           // []
     case Alternation
+    
+    var readableDesp: String {
+        switch self {
+        case .Alternation:
+            return "|"
+        default:
+            break
+        }
+        return "NULL"
+    }
 }
 
 class SemanticUnit {
@@ -36,6 +46,16 @@ class LiteralSemantic: SemanticUnit {
     }
 }
 
+class RepeatingSemantic: SemanticUnit {
+    let quantifier: QuantifierMenifest
+    let semanticToRepeat: SemanticUnit
+    init(_ repeatingSemanticUnit: SemanticUnit, quantifier: QuantifierMenifest) {
+        self.semanticToRepeat = repeatingSemanticUnit
+        self.quantifier = quantifier
+        super.init(type: .Repeating)
+    }
+}
+
 class GroupSemantic: SemanticUnit {
     let semanticUnits: [SemanticUnit]
     init(semanticUnits: [SemanticUnit]) {
@@ -45,51 +65,9 @@ class GroupSemantic: SemanticUnit {
 }
 
 class ClassSemantic: SemanticUnit {
-    enum ClassSemanticType {
-        case Include
-        case Exclude
-    }
-    
-    let classCheckType: ClassSemanticType
-    let characterSet: Set<Character>
-    
-    init(classLexeme: ClassLexeme) {
-        switch classLexeme.literalClass.type {
-        case .Include:
-            self.classCheckType = .Include
-        case .Exclude:
-            self.classCheckType = .Exclude
-        }
-        self.characterSet = Set(classLexeme.literalClass.characters)
-        super.init(type: .Class)
-    }
-    
-    init(lexemesInsideClassSymbol: [Lexeme]) throws {
-        self.classCheckType = .Include
-        var ite = lexemesInsideClassSymbol.makeIterator()
-        
-        var lastLexeme: Lexeme?
-        var characterSetBuffer: Set<Character> = []
-        
-        while let lexeme = ite.next() {
-            switch lexeme.lexemeType {
-            case .Hyphen:
-                let peekLexeme = ite.next()
-                if let nextLiteralLexeme = peekLexeme as? LiteralLexeme, let previousLiteralLexeme = lastLexeme as? LiteralLexeme {
-                    let charactersBetween = try Parser.createLiteralsBetween(startLiteralLexeme: previousLiteralLexeme, endLiteralLexeme: nextLiteralLexeme)
-                    characterSetBuffer.formUnion(charactersBetween)
-                } else {
-                    throw RegExSwiftError.fromType(RegExSwiftErrorType.hyphenSematic)
-                }
-                lastLexeme = peekLexeme as Lexeme?
-            case .Literal:
-                characterSetBuffer.insert((lexeme as! LiteralLexeme).value)
-                lastLexeme = lexeme
-            default:
-                lastLexeme = nil //ignore unknown lexeme
-            }
-        }
-        self.characterSet = characterSetBuffer
+    let literalClass: LiteralsClass
+    init(literalClass: LiteralsClass) {
+        self.literalClass = literalClass
         super.init(type: .Class)
     }
 }

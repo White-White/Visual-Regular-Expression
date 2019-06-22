@@ -33,12 +33,14 @@ extension BaseState: GraphNode {
         case .repeat:
             let repeatState = (self as! RepeatState)
             var ret: [GraphNode] = [repeatState.repeatingState as GraphNode]
-            if repeatState.repeatChecker.allowZeroRepeat() {
+            if repeatState.repeatChecker.repeatCriteriaHasBeenMet() {
                 ret.append(repeatState.dummyEnd)
             }
             return ret
         case .accepted:
             return []
+        case .class:
+            return [(self as! ClassState).out as GraphNode]
         }
     }
 }

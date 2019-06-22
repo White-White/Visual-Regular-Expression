@@ -27,19 +27,34 @@ class Parser {
         var semanticUnitStack: [SemanticUnit] = []
 
         while let lexeme = self.nextLexeme() {
-            switch lexeme.lexemeType {
+            let type = lexeme.lexemeType
+            switch type {
             case .Literal:
                 semanticUnitStack.append(LiteralSemantic(lexeme: lexeme as! LiteralLexeme))
             case .Alternation:
                 semanticUnitStack.append(SemanticUnit(type: .Alternation))
+                
+                //Quantifier
             case .Plus:
-                let qMeni = QuantifierMenifest(lowerBound: 1, higherBound: UInt.max)
-                semanticUnitStack.append(SemanticUnit(type: .Quantifier(qMeni: qMeni)))
-            case .Hyphen:
-                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol("-"))
+                fallthrough
             case .Star:
-                let qMeni = QuantifierMenifest(lowerBound: 0, higherBound: UInt.max)
-                semanticUnitStack.append(SemanticUnit(type: .Quantifier(qMeni: qMeni)))
+                fallthrough
+            case .QuestionMark:
+                guard let lastSemanticUnit = semanticUnitStack.popLast() else { throw RegExSwiftError.fromType(RegExSwiftErrorType.invalidOperand(s: String(type.readableCharDesk), isLeft: true)) }
+                let qMeni: QuantifierMenifest
+                if type == .Plus {
+                    qMeni = QuantifierMenifest(lowerBound: 1, higherBound: UInt.max)
+                } else if type == .Star {
+                    qMeni = QuantifierMenifest(lowerBound: 0, higherBound: UInt.max)
+                } else { //theType == .QuestionMark
+                    qMeni = QuantifierMenifest(lowerBound: 0, higherBound: 1)
+                }
+                let repeatingSeman = RepeatingSemantic(lastSemanticUnit, quantifier: qMeni)
+                semanticUnitStack.append(repeatingSeman)
+                //Quantifier
+                
+            case .Hyphen:
+                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol(type.readableCharDesk))
             case .GroupStart:
                 let semanticUnitsOfThisGroup = try self.createSemanticUnits()
                 guard !semanticUnitsOfThisGroup.isEmpty else { continue }
@@ -50,36 +65,48 @@ class Parser {
             case .ClassStart:
                 semanticUnitStack.append(try self.createClassSemantic())
             case .ClassEnd:
-                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol("]"))
+                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol(type.readableCharDesk))
             case .Comma:
-                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol(","))
+                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol(type.readableCharDesk))
             case .CurlyStart:
-                let quanti = try self.createQuantiferInCurly()
-                semanticUnitStack.append(SemanticUnit(type: .Quantifier(qMeni: quanti)))
+                guard let lastSemanticUnit = semanticUnitStack.popLast() else { throw RegExSwiftError.fromType(RegExSwiftErrorType.invalidOperand(s: String(type.readableCharDesk), isLeft: true)) }
+                let repeatingSeman = RepeatingSemantic(lastSemanticUnit, quantifier: try self.createQuantiferInCurly())
+                semanticUnitStack.append(repeatingSeman)
             case .CurlyEnd:
-                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol("}"))
+                throw RegExSwiftError.fromType(RegExSwiftErrorType.unexpectedSymbol(type.readableCharDesk))
             case .LiteralClass:
-                semanticUnitStack.append(ClassSemantic(classLexeme: lexeme as! ClassLexeme))
+                semanticUnitStack.append(ClassSemantic(literalClass: (lexeme as! ClassLexeme).literalClass))
             }
         }
         return semanticUnitStack
     }
     
     private func createClassSemantic() throws -> ClassSemantic {
-        var lexemeBuffer: [Lexeme] = []
-        var numOfClassStartEncountered: Int = 0
         
-        while let nextLexeme = self.nextLexeme() {
-            switch nextLexeme.lexemeType {
+        var prevLexeme: Lexeme?
+        var numOfClassStartEncountered: Int = 0
+        var characterSetBuffer: Set<Character> = []
+        
+        while let lexeme = self.nextLexeme() {
+            switch lexeme.lexemeType {
             case .Literal:
-                lexemeBuffer.append(nextLexeme)
+                characterSetBuffer.insert((lexeme as! LiteralLexeme).value)
+                prevLexeme = lexeme
             case .Hyphen:
-                lexemeBuffer.append(nextLexeme)
+                let peekLexeme = self.nextLexeme()
+                if let nextLiteralLexeme = peekLexeme as? LiteralLexeme, let previousLiteralLexeme = prevLexeme as? LiteralLexeme {
+                    let charactersBetween = try Parser.createLiteralsBetween(startLiteralLexeme: previousLiteralLexeme, endLiteralLexeme: nextLiteralLexeme)
+                    characterSetBuffer.formUnion(charactersBetween)
+                } else {
+                    throw RegExSwiftError.fromType(RegExSwiftErrorType.hyphenSematic)
+                }
+                prevLexeme = peekLexeme
             case .ClassStart:
                 numOfClassStartEncountered += 1
             case .ClassEnd:
                 if (numOfClassStartEncountered == 0) {
-                    return try ClassSemantic(lexemesInsideClassSymbol: lexemeBuffer)
+                    let liteClass = LiteralsClass(type: .Include, characters: characterSetBuffer)
+                    return ClassSemantic(literalClass: liteClass)
                 } else {
                     numOfClassStartEncountered -= 1
                 }
@@ -91,44 +118,47 @@ class Parser {
         throw RegExSwiftError.fromType(RegExSwiftErrorType.unmatchedClassSymbol)
     }
     
+    
+    
     private func createQuantiferInCurly() throws -> QuantifierMenifest {
-        var lexemeBuffer: [LiteralLexeme] = []
-        var lowerBound: UInt?
-        var hasMetComma: Bool = false
+        
+        func numberFrom(_ lexemes: [Lexeme]) -> UInt? {
+            guard let literals = lexemes as? [LiteralLexeme] else  { return nil }
+            let literalString = String(literals.map { $0.value })
+            return UInt(literalString)
+        }
+        
+        var lexemeBuffer: [Lexeme] = []
         
         while let lexeme = self.nextLexeme() {
             switch lexeme.lexemeType {
-            case .Literal:
-                let literalLexeme = lexeme as! LiteralLexeme
-                guard LiteralsClass.digits.contains(literalLexeme.value) else {
-                    throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
-                }
-                lexemeBuffer.append(literalLexeme)
-            case .Comma:
-                guard !hasMetComma else {
-                    throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
-                }
-                hasMetComma = true
-                let stringLeftComma = String(lexemeBuffer.map { $0.value })
-                if let lower = UInt(stringLeftComma) {
-                    lowerBound = lower
-                    lexemeBuffer.removeAll()
-                } else {
-                    throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
-                }
             case .CurlyEnd:
-                guard let lowerBound = lowerBound else {
-                    throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
+                var indexOfComma: Int?
+                for (index, value) in lexemeBuffer.enumerated() {
+                    if value.lexemeType == .Comma {
+                        indexOfComma = index
+                    }
                 }
-                if let higher = UInt(String(lexemeBuffer.map { $0.value })) {
-                    return QuantifierMenifest(lowerBound: lowerBound, higherBound: higher)
+                if let indexOfComma = indexOfComma {
+                    guard let left = numberFrom(Array(lexemeBuffer[0..<indexOfComma])) else {
+                        throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
+                    }
+                    let rightLexemes = (indexOfComma < (lexemeBuffer.count - 1)) ? lexemeBuffer[(indexOfComma + 1)..<(lexemeBuffer.count - 1)] : nil
+                    let right = rightLexemes == nil ? nil : numberFrom(Array(rightLexemes!))
+                    return QuantifierMenifest(lowerBound: left, higherBound: right ?? UInt.max)
                 } else {
-                    return QuantifierMenifest(lowerBound: lowerBound, higherBound: UInt.max)
+                    guard let left = numberFrom(lexemeBuffer) else {
+                        throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
+                    }
+                    return QuantifierMenifest(lowerBound: left, higherBound: UInt.max)
                 }
             default:
-                throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
+                lexemeBuffer.append(lexeme)
             }
         }
+        
+        //didn't find matched curly
+        throw RegExSwiftError.fromType(RegExSwiftErrorType.syntaxErrorInCurly)
     }
     
     

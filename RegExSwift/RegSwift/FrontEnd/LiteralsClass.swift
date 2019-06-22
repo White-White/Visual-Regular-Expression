@@ -15,25 +15,25 @@ enum LiteralsClassType {
 
 struct LiteralsClass {
     let type: LiteralsClassType
-    let characters: [Character]
+    let characters: Set<Character>
     
     /*
      https://www.vogella.com/tutorials/JavaRegularExpressions/article.html
      */
     
-    private static let whiteSpaces = [
-        0x09,  // \t
-        0x0a,  // \n
-        0x0b,  // VT
-        0x0c,  // \f
-        0x0d   // \r
-        ].map{ Character(UnicodeScalar($0)) }
+    private static let whiteSpaces = Set(arrayLiteral:
+        Character(UnicodeScalar(0x09)),  // \t
+        Character(UnicodeScalar(0x0a)),  // \n
+        Character(UnicodeScalar(0x0b)),  // VT
+        Character(UnicodeScalar(0x0c)),  // \f
+        Character(UnicodeScalar(0x0d))   // \r
+        )
     
-    static let digits = Array("1234567890")
-    private static let letters = Array("abcdefghijklmnopqrstuvwxyz")
-    private static let lettersUpper = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    static let digits = Set(Array("1234567890")) as Set<Character>
+    private static let letters = Set(Array("abcdefghijklmnopqrstuvwxyz")) as Set<Character>
+    private static let lettersUpper = Set(Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ")) as Set<Character>
     
-    init(type: LiteralsClassType, characters: [Character]) {
+    init(type: LiteralsClassType, characters: Set<Character>) {
         self.type = type
         self.characters = characters
     }
@@ -54,10 +54,10 @@ struct LiteralsClass {
             self.characters = LiteralsClass.whiteSpaces
         case "w":
             self.type = .Include
-            self.characters = LiteralsClass.digits + LiteralsClass.letters + LiteralsClass.lettersUpper
+            self.characters = LiteralsClass.digits.union(LiteralsClass.letters).union(LiteralsClass.lettersUpper)
         case "W":
             self.type = .Exclude
-            self.characters = LiteralsClass.digits + LiteralsClass.letters + LiteralsClass.lettersUpper
+            self.characters = LiteralsClass.digits.union(LiteralsClass.letters).union(LiteralsClass.lettersUpper)
 //        case "b":
 //        case "S+"
         default:
