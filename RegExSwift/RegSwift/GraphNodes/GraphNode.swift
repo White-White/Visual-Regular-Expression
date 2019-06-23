@@ -17,7 +17,6 @@ public protocol GraphNode {
 }
 
 extension BaseState: GraphNode {
-//    var nodeName: String { return self.stateName }
     var nodeName: String {
         if let stateName = self.stateName {
             return stateName
@@ -25,50 +24,8 @@ extension BaseState: GraphNode {
             self.stateName = RegSwift.nameCreator!.nextName()
             return self.stateName!
         }
-//        return self.debugDescription
     }
-    var inputCharactersDescription: String { return self.inputSetDescription ?? "NEEDFIX" }
-    var highLighted: Bool { return false }
-    
-    var nextNodes: [GraphNode] {
-        switch self.stateType {
-        case .value:
-            return [(self as! ValueState).out as GraphNode]
-        case .dumb:
-            return [(self as! DumbState).out as GraphNode]
-        case .split:
-            return [(self as! SplitState).primaryOut, (self as! SplitState).secondaryOut]
-        case .repeat:
-            let repeatState = (self as! RepeatState)
-            var ret: [GraphNode] = [repeatState.repeatingState as GraphNode]
-            if repeatState.repeatChecker.repeatCriteriaHasBeenMet() {
-                ret.append(repeatState.dummyEnd)
-            }
-            return ret
-        case .accepted:
-            return []
-        case .class:
-            return [(self as! ClassState).out as GraphNode]
-        }
-    }
+    var inputCharactersDescription: String { return self.inputsDesp ?? "NEEDFIX" }
+    var highLighted: Bool { return self.isAccepted }
+    var nextNodes: [GraphNode] { return self.possibleOuts() as [GraphNode] }
 }
-
-//public class GraphNodeGenerator: NSObject {
-//
-//    private var pattern: String
-//    private var matchString: String
-//
-//    private var regSwift: RegSwift
-//
-//    @objc
-//    public init(withPattern pattern: String, matchString: String) throws {
-//        self.pattern = pattern
-//        self.matchString = matchString
-//        self.regSwift = try RegSwift(pattern: pattern)
-//    }
-//
-//    @objc
-//    public func forward() {
-//
-//    }
-//}

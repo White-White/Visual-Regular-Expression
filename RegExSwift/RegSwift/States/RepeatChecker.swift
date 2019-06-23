@@ -16,8 +16,12 @@ class RepeatChecker {
         self.quantifier = quantifier
     }
     
-    func repeatCriteriaHasBeenMet() -> Bool {
+    private func repeatCriteriaHasBeenMet() -> Bool {
         return repeatCount >= quantifier.lowerBound && repeatCount <= quantifier.higherBound
+    }
+    
+    func needRepeat() -> Bool {
+        return !self.repeatCriteriaHasBeenMet()
     }
     
     func canRepeat() -> Bool {

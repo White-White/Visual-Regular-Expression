@@ -18,7 +18,7 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSURL *librariesDirURL = [[[NSBundle mainBundle] bundleURL] URLByAppendingPathComponent:@"Contents/Frameworks/" isDirectory:YES];
-        int ret = setenv("GVBINDIR", (char*)[[librariesDirURL path] UTF8String], 1);
+        setenv("GVBINDIR", (char*)[[librariesDirURL path] UTF8String], 1);
     });
     
     [RegSwift reset];
@@ -63,20 +63,31 @@
 }
 
 - (void)addNodesFor: (graph_t *)g withHeadNode: (id<GraphNode>)headNode {
-    NSArray <id<GraphNode>>* nextNodes = [headNode nextNodes];
+    NSString *fromNodeName = [headNode nodeName];
+    Agnode_t *fromNode;
+    fromNode = agnode(g, (char *)[fromNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
     
-    for (id<GraphNode> oneNextNode in nextNodes) {
-        Agnode_t *firstNode;
-        firstNode = agnode(g, (char *)[[headNode nodeName] cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
+    for (id<GraphNode> oneNextNode in [headNode nextNodes]) {
+        NSString *toNodeName = [oneNextNode nodeName];
+        NSString *pathDesp = [oneNextNode inputCharactersDescription];
+#if DEBUG
+        NSLog(@"从 %@ 连接到 %@，可接受的输入为%@", fromNodeName, toNodeName, pathDesp);
+#endif
+        
         
         Agnode_t *secondNode;
-        secondNode = agnode(g, (char *)[[oneNextNode nodeName] cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
+        secondNode = agnode(g, (char *)[toNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
         
-        Agedge_t *edge_A_B = agedge(g, firstNode, secondNode, "bridge", TRUE);
-        agset(edge_A_B, "label", (char *)[headNode.inputCharactersDescription cStringUsingEncoding:NSUTF8StringEncoding]);
+        Agedge_t *edge_A_B = agedge(g, fromNode, secondNode, "bridge", TRUE);
+        agset(edge_A_B, "label", (char *)[pathDesp cStringUsingEncoding:NSUTF8StringEncoding]);
         
         //recursive
         [self addNodesFor:g withHeadNode:oneNextNode];
+    }
+    
+    if ([headNode highLighted]) {
+        agsafeset(fromNode, "style", "filled", "solid");
+        agsafeset(fromNode, "fillcolor", "#fd8c25", "lightgrey");
     }
 }
 

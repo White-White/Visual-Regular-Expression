@@ -47,18 +47,18 @@ public class RegSwift: NSObject {
             
             //e演进
             print("ε 演进开始")
-            evolve = evolve.flatMap { $0.forwardWithEmptyInput() }
+            evolve = evolve.flatMap { $0.outs(with: nil) }
             print("ε 演进结果: evolve包含\(evolve.count)个状态:")
             evolve.forEach { print($0) }
             
             //character演进
             print("\(character) 演进开始")
-            evolve = evolve.flatMap { $0.forwardWithInput(character) }
-            print("ε 演进结果: evolve包含\(evolve.count)个状态:")
+            evolve = evolve.flatMap { $0.outs(with: character) }
+            print("\(character) 演进结果: evolve包含\(evolve.count)个状态:")
             evolve.forEach { print($0) }
             
             //结果检查
-            if evolve.contains(where: { $0 === AcceptState.shared }) {
+            if evolve.contains(where: { $0.isAccepted }) {
                 print("本次演进找到接受结果，演进结束")
                 return true
             }

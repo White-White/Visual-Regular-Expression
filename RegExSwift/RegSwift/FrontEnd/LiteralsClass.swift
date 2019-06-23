@@ -73,4 +73,9 @@ struct LiteralsClass {
             return !self.characters.contains(character)
         }
     }
+    
+    func criteriaDesp() -> String {
+        let criteria = (Array(self.characters).map { String($0) }).joined(separator: ",")
+        return String.init(format: "\(self.type == .Exclude ? "!" : "")%@", criteria)
+    }
 }

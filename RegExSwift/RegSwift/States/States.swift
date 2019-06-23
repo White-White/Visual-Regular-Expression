@@ -14,125 +14,98 @@ enum StateType {
     case split
     case `repeat`
     case `class`
-    case accepted
 }
 
 class BaseState: NSObject {
     var stateName: String?
-    var inputSetDescription: String?
+    var inputsDesp: String?
     
+    var outs: [BaseState] = []
     let stateType: StateType
-    init(_ stateType: StateType) {
+    var isAccepted: Bool
+    init(_ stateType: StateType, isAccepted: Bool) {
         self.stateType = stateType
+        self.isAccepted = isAccepted
     }
-    
-    //Operations
-    func forwardWithEmptyInput() -> [BaseState] { fatalError() }
-    func forwardWithInput(_ character: Character) -> [BaseState] { fatalError() }
-    func connect(_ state: BaseState) { fatalError() }
-    
-    override var debugDescription: String { return "\(self.stateType)" }
-}
 
-class ValueState: BaseState {
-    let character: Character
-    var out: BaseState
-    
-    init(_ c: Character) {
-        self.character = c
-        self.out = AcceptState.shared
-        super.init(.value)
-        self.inputSetDescription = String(c)
+    func connect(_ state: BaseState) {
+        self.outs.forEach { $0.connect(state) }
+        self.isAccepted = false
     }
     
-    override func forwardWithEmptyInput() -> [BaseState] {
-        return [self]
-    }
-    override func forwardWithInput(_ character: Character) -> [BaseState] {
-        return self.character == character ? [self.out] : []
-    }
-    override func connect(_ state: BaseState) {
-        if self.out === AcceptState.shared {
-            self.out = state
-        } else {
-            self.out.connect(state)
-        }
-    }
+    //find outs.
+    //when input is nil, it's empty input
+    func outs(with c: Character?) -> [BaseState] { fatalError() }
+    func possibleOuts() -> [BaseState] { return self.outs }
+    
+    //Debug
+    override var debugDescription: String { return "\(self.stateType)" }
 }
 
 class ClassState: BaseState {
     let literalClass: LiteralsClass
-    var out: BaseState
-
     init(_ literalClass: LiteralsClass) {
         self.literalClass = literalClass
-        self.out = AcceptState.shared
-        super.init(.class)
+        super.init(.class, isAccepted: true)
+        self.inputsDesp = literalClass.criteriaDesp()
     }
-    
-    override func forwardWithEmptyInput() -> [BaseState] {
-        return [self]
-    }
-    override func forwardWithInput(_ character: Character) -> [BaseState] {
-        return self.literalClass.accepts(character) ? [self.out] : []
+    override func outs(with c: Character?) -> [BaseState] {
+        if let c = c {
+            return self.literalClass.accepts(c) ? self.outs : []
+        } else {
+            return [self]
+        }
     }
     override func connect(_ state: BaseState) {
-        if self.out === AcceptState.shared {
-            self.out = state
-        } else {
-            self.out.connect(state)
+        super.connect(state)
+        if self.outs.isEmpty {
+            self.outs.append(state)
         }
     }
 }
 
+class ValueState: ClassState {
+    init(_ c: Character) {
+        super.init(LiteralsClass(type: .Include, characters: Set(arrayLiteral: c)))
+    }
+}
+
 class SplitState: BaseState {
-    var primaryOut: BaseState
-    var secondaryOut: BaseState
-    
     init(primaryOut: BaseState, secondaryOut: BaseState) {
-        self.primaryOut = primaryOut
-        self.secondaryOut = secondaryOut
-        super.init(.split)
-        self.inputSetDescription = "ε"
+        super.init(.split, isAccepted: false)
+        self.outs.append(contentsOf: [primaryOut, secondaryOut])
+        self.inputsDesp = "ε"
     }
     
-    override func forwardWithEmptyInput() -> [BaseState] {
-        return self.primaryOut.forwardWithEmptyInput() + self.secondaryOut.forwardWithEmptyInput()
-    }
-    override func forwardWithInput(_ character: Character) -> [BaseState] {
-        fatalError() //SplitState is not designed to forward with input
-    }
-    override func connect(_ state: BaseState) {
-        primaryOut.connect(state)
-        secondaryOut.connect(state)
+    override func outs(with c: Character?) -> [BaseState] {
+        if let _ = c {
+            fatalError() //SplitState is not designed to forward with any input
+        } else {
+            return self.outs.reduce([]) { return $0 + $1.outs(with: nil) }
+        }
     }
 }
 
 
 //MARK: - Dummy
-protocol DumbStateDelegate: NSObjectProtocol {
-    func dummy_forwardWithEmptyInput() -> [BaseState]
-    func dummy_forwardWithInput(_ character: Character) -> [BaseState]
+protocol SplitOutStateDelegate: NSObjectProtocol {
+    func splitEnding_outs(with c: Character?) -> [BaseState]
 }
 
-class DumbState: BaseState {
-    var out: BaseState
-    weak var delegate: DumbStateDelegate?
-    
+private class SplitOutState: BaseState {
+    weak var delegate: SplitOutStateDelegate?
     init() {
-        self.out = AcceptState.shared
-        super.init(.dumb)
+        super.init(.dumb, isAccepted: true)
     }
     
-    override func forwardWithEmptyInput() -> [BaseState] {
-        return self.delegate!.dummy_forwardWithEmptyInput()
-    }
-    override func forwardWithInput(_ character: Character) -> [BaseState] {
-        return self.delegate!.dummy_forwardWithInput(character)
+    override func outs(with c: Character?) -> [BaseState] {
+        return self.delegate!.splitEnding_outs(with: c)
     }
     override func connect(_ state: BaseState) {
-        guard self.out === AcceptState.shared else { fatalError() }
-        self.out = state
+        super.connect(state)
+        if self.outs.isEmpty {
+            self.outs.append(state)
+        }
     }
 }
 
@@ -141,72 +114,40 @@ class DumbState: BaseState {
 class RepeatState: BaseState {
     let repeatChecker: RepeatChecker
     let repeatingState: BaseState
-    var dummyEnd: DumbState
+    private var endingState: SplitOutState
     
     init(with quantifier: QuantifierMenifest, repeatingState: BaseState) {
         self.repeatChecker = RepeatChecker(with: quantifier)
         self.repeatingState = repeatingState
-        self.dummyEnd = DumbState()
-        super.init(.repeat)
-        self.dummyEnd.delegate = self
-        self.repeatingState.connect(self.dummyEnd)
+        self.endingState = SplitOutState()
+        super.init(.repeat, isAccepted: false)
+        self.endingState.delegate = self
+        self.repeatingState.connect(self.endingState)
+        self.outs.append(contentsOf: [self.repeatingState, self.endingState])
     }
     
-    //MARK: RepeatState Operations
-    override func forwardWithEmptyInput() -> [BaseState] {
-        if self.repeatChecker.repeatCriteriaHasBeenMet() {
+    override func outs(with c: Character?) -> [BaseState] {
+        if self.repeatChecker.needRepeat() {
+            return self.repeatingState.outs(with: c)
+        } else {
             var result: [BaseState] = []
-            result += self.dummyEnd.out.forwardWithEmptyInput()
+            let realOuts = self.endingState.outs.reduce([]) { return $0 + $1.outs(with: nil) }
+            result += realOuts
             if self.repeatChecker.canRepeat() {
-                result += self.repeatingState.forwardWithEmptyInput()
+                result += self.repeatingState.outs(with: c)
             }
             return result
-        } else {
-            return self.repeatingState.forwardWithEmptyInput()
-        }
-    }
-    
-    override func forwardWithInput(_ character: Character) -> [BaseState] {
-        if self.repeatChecker.repeatCriteriaHasBeenMet() {
-            var result: [BaseState] = []
-            result += self.dummyEnd.out.forwardWithInput(character)
-            if self.repeatChecker.canRepeat() {
-                result += self.repeatingState.forwardWithInput(character)
-            }
-            return result
-        } else {
-            return self.repeatingState.forwardWithInput(character)
         }
     }
     
     override func connect(_ state: BaseState) {
-        self.dummyEnd.connect(state)
+        self.endingState.connect(state)
     }
 }
 
-extension RepeatState: DumbStateDelegate {
-    func dummy_forwardWithEmptyInput() -> [BaseState] {
-        return self.forwardWithEmptyInput()
-    }
-    
-    func dummy_forwardWithInput(_ character: Character) -> [BaseState] {
-        return self.dummy_forwardWithInput(character)
-    }
-}
-
-
-class AcceptState: BaseState {
-    static let shared = AcceptState(.accepted)
-    
-    //MARK: AcceptState Operations
-    override func forwardWithEmptyInput() -> [BaseState] {
-        return [self]
-    }
-    override func forwardWithInput(_ character: Character) -> [BaseState] {
-        fatalError()
-    }
-    override func connect(_ state: BaseState) {
-        fatalError()
+extension RepeatState: SplitOutStateDelegate {
+    func splitEnding_outs(with c: Character?) -> [BaseState] {
+        return self.outs(with: c)
     }
 }
 
