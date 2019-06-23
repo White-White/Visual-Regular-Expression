@@ -201,7 +201,9 @@ class StatesCreator {
             }
             
             currentState?.connect(resultState)
-            currentState = resultState
+            if currentState == nil {
+                currentState = resultState
+            }
         }
         
         return  currentState!
