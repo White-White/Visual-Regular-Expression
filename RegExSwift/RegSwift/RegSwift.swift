@@ -18,7 +18,7 @@ struct StateNameCreator {
 }
 
 public class RegSwift: NSObject {
-    private let startState: StartState
+    private let startState: InterState = InterState()
     private let parrern: String
     
     static var nameCreator: StateNameCreator?
@@ -31,9 +31,8 @@ public class RegSwift: NSObject {
         let parser = try Parser(lexemes: lexemes)
         let semanticUnits = try parser.getSemanticUnits()
         let headState = try StatesCreator.createHeadState(from: semanticUnits)
-        let startState = StartState()
+        startState.stateName = "Go"
         startState.connect(headState)
-        self.startState = startState
     }
     
     func match(_ m: String) throws -> Bool {
@@ -49,7 +48,7 @@ public class RegSwift: NSObject {
             
             //e演进
             print("ε 演进开始")
-            evolve = evolve.flatMap { $0.outs(with: nil) }
+            evolve = evolve.flatMap { $0.outsWithEmpty() }
             print("ε 演进结果: evolve包含\(evolve.count)个状态:")
             evolve.forEach { print($0) }
             

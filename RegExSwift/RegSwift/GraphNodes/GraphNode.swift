@@ -15,7 +15,7 @@ public protocol GraphNode {
     
     var normalNextNodes: [GraphNode] { get }
     var extraNextNodes: [GraphNode] { get }
-    func pathDeskForNextNode(_ node: GraphNode) -> String
+    func pathDespForNextNode(_ node: GraphNode) -> String
 }
 
 extension BaseState: GraphNode {
@@ -29,27 +29,30 @@ extension BaseState: GraphNode {
     }
     
     var nodeFillColorHex: String {
-        if self is StartState {
-            return "#2cbb4d" //some green
-        }
+//        if self is StartState {
+//            return "#2cbb4d" //some green
+//        }
         let colorDesp = self.isAccepted ? "#fd8c25" : "#ffffff" //some orange or white
         return colorDesp
     }
     
-    var normalNextNodes: [GraphNode] { return self.outs }
+    var normalNextNodes: [GraphNode] {
+        return self.graphicOuts()
+    }
     var extraNextNodes: [GraphNode] {
-        guard let splitOutState = self as? SplitOutState,
-            let backSplitState = splitOutState.backingSplitState else { return [] }
-        return [backSplitState]
+        guard let repeatOutState = self as? InterState,
+            let repeatState = repeatOutState.delegate as? RepeatState else { return [] }
+        return [repeatState]
     }
     
-    func pathDeskForNextNode(_ node: GraphNode) -> String {
-        if let splitOut = self as? SplitOutState,
+    func pathDespForNextNode(_ node: GraphNode) -> String {
+        if let repeatOut = self as? InterState,
             let repeatState = node as? RepeatState,
-            splitOut.backingSplitState == repeatState {
+            let delegateRepeat = repeatOut.delegate as? RepeatState,
+            delegateRepeat === repeatState {
             return "repeat"
         } else {
-            return (node as! BaseState).inputsDesp ?? "NEEDFIX"
+            return (node as! BaseState).acceptanceDesp ?? "NEEDFIX"
         }
     }
 }

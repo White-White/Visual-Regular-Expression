@@ -67,9 +67,10 @@
     Agnode_t *fromNode;
     fromNode = agnode(g, (char *)[fromNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
     
-    for (id<GraphNode> oneNextNode in [headNode normalNextNodes]) {
+    NSArray <id<GraphNode>>* normalNextNodes = [headNode normalNextNodes];
+    for (id<GraphNode> oneNextNode in normalNextNodes) {
         NSString *toNodeName = [oneNextNode nodeName];
-        NSString *pathDesp = [headNode pathDeskForNextNode:oneNextNode];
+        NSString *pathDesp = [headNode pathDespForNextNode:oneNextNode];
 #if DEBUG
         NSLog(@"从 %@ 连接到 %@，可接受的输入为%@", fromNodeName, toNodeName, pathDesp);
 #endif
@@ -85,7 +86,7 @@
     
     for (id<GraphNode> extraNextNode in [headNode extraNextNodes]) {
         NSString *toNodeName = [extraNextNode nodeName];
-        NSString *pathDesp = [headNode pathDeskForNextNode:extraNextNode];
+        NSString *pathDesp = [headNode pathDespForNextNode:extraNextNode];
 #if DEBUG
         NSLog(@"从 %@ 连接到 %@，可接受的输入为%@", fromNodeName, toNodeName, pathDesp);
 #endif

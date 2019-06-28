@@ -27,6 +27,10 @@ class RepeatChecker {
     func canRepeat() -> Bool {
         return self.repeatCount < quantifier.higherBound
     }
+    
+    func canZeroRepeat() -> Bool {
+        return self.quantifier.lowerBound == 0
+    }
 
     func forward() {
         repeatCount += 1

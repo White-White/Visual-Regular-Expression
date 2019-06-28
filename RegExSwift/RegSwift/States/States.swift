@@ -9,157 +9,160 @@
 import Foundation
 
 enum StateType {
-    case start
-    case value
-    case dumb
-    case split
-    case `repeat`
-    case `class`
+    case InterState
+    case ClassState
+    case RepeatState
+    case SplitState
 }
 
-class BaseState: NSObject {
+class BaseState {
     var stateName: String?
-    var inputsDesp: String?
+    var acceptanceDesp: String?
+    var stateType: StateType
+    var isAccepted: Bool = true
+    
+    init(_ type: StateType) {
+        self.stateType = type
+    }
     
     var outs: [BaseState] = []
-    let stateType: StateType
-    var isAccepted: Bool
-    init(_ stateType: StateType, isAccepted: Bool) {
-        self.stateType = stateType
-        self.isAccepted = isAccepted
-    }
-
-    func connect(_ state: BaseState) {
-        self.outs.forEach { $0.connect(state) }
-        self.isAccepted = false
+    
+    //empty input
+    func outsWithEmpty() -> [BaseState] { fatalError() }
+    
+    //find outs
+    func outs(with c: Character) -> [BaseState] {
+        return outs.filter { $0.canAccept(c: c) }
     }
     
-    //find outs.
-    //when input is nil, it's empty input
-    func outs(with c: Character?) -> [BaseState] { fatalError() }
+    func canAccept(c: Character) -> Bool { fatalError() }
     
-    //Debug
-    override var debugDescription: String { return "\(self.stateType)" }
+    //connect with other state
+    func connect(_ state: BaseState) { fatalError() }
+    
+    //
+    func graphicOuts() -> [BaseState] { return self.outs }
 }
 
-class StartState: BaseState {
+protocol InterStateOutDelegate where Self: AnyObject {
+    func interState(_ inter: InterState, outsWith c: Character) -> [BaseState]
+    func interStateWithEmpty(_ inter: InterState) -> [BaseState]
+}
+
+class InterState: BaseState {
+    weak var delegate: InterStateOutDelegate?
+    
     init() {
-        super.init(.start, isAccepted: false)
-        self.stateName = "Go"
+        super.init(.InterState)
+        self.acceptanceDesp = "ε"
     }
-    override func outs(with c: Character?) -> [BaseState] {
-        if c != nil { fatalError() }
-        return self.outs
-    }
-    override func connect(_ state: BaseState) {
-        super.connect(state)
-        if self.outs.isEmpty {
-            self.outs.append(state)
+    
+    override func outs(with c: Character) -> [BaseState] {
+        if let delegate = delegate {
+            return delegate.interState(self, outsWith: c)
         }
+        return super.outs(with: c)
+    }
+    
+    override func outsWithEmpty() -> [BaseState] {
+        if let delegate = delegate {
+            return delegate.interStateWithEmpty(self)
+        }
+        return self.outs.reduce([], { $0 + $1.outsWithEmpty() })
+    }
+    
+    override func connect(_ state: BaseState) {
+        self.isAccepted = false
+        self.outs.append(state)
     }
 }
 
 class ClassState: BaseState {
     let literalClass: LiteralsClass
-    init(_ literalClass: LiteralsClass) {
+    init(literalClass: LiteralsClass) {
         self.literalClass = literalClass
-        super.init(.class, isAccepted: true)
-        self.inputsDesp = literalClass.criteriaDesp()
+        super.init(.ClassState)
+        self.acceptanceDesp = literalClass.criteriaDesp()
     }
-    override func outs(with c: Character?) -> [BaseState] {
-        if let c = c {
-            return self.literalClass.accepts(c) ? self.outs : []
-        } else {
-            return [self]
-        }
+    
+    override func outsWithEmpty() -> [BaseState] { return [self] }
+    
+    override func canAccept(c: Character) -> Bool {
+        return self.literalClass.accepts(c)
     }
+    
     override func connect(_ state: BaseState) {
-        super.connect(state)
-        if self.outs.isEmpty {
-            self.outs.append(state)
-        }
-    }
-}
-
-class ValueState: ClassState {
-    init(_ c: Character) {
-        super.init(LiteralsClass(type: .Include, characters: Set(arrayLiteral: c)))
+        self.isAccepted = false
+        self.outs.append(state)
     }
 }
 
 class SplitState: BaseState {
-    init(primaryOut: BaseState, secondaryOut: BaseState) {
-        super.init(.split, isAccepted: false)
-        self.outs.append(contentsOf: [primaryOut, secondaryOut])
-        self.inputsDesp = "ε"
-    }
+    var splitStarts: [InterState] = []
+    let splitEnd: InterState = InterState()
     
-    override func outs(with c: Character?) -> [BaseState] {
-        if let _ = c {
-            fatalError() //SplitState is not designed to forward with any input
-        } else {
-            return self.outs.reduce([]) { return $0 + $1.outs(with: nil) }
+    init(_ outs: [BaseState]) {
+        super.init(.SplitState)
+        self.isAccepted = false
+        outs.forEach {
+            let splitStart = InterState()
+            splitStart.connect($0)
+            self.splitStarts.append(splitStart)
+            $0.connect(self.splitEnd)
         }
-    }
-}
-
-
-//MARK: - Dummy
-protocol SplitOutStateDelegate: NSObjectProtocol {
-    func splitEnding_outs(with c: Character?) -> [BaseState]
-}
-
-class SplitOutState: BaseState {
-    static var outCounter = 0
-    weak var backingSplitState: RepeatState?
-
-    init() {
-        super.init(.dumb, isAccepted: true)
-        SplitOutState.outCounter += 1
-        self.inputsDesp = "ε"
+        self.acceptanceDesp = "ε"
     }
     
-    func setBackingSplitState(_ s: RepeatState) {
-        self.backingSplitState = s
+    override func outsWithEmpty() -> [BaseState] {
+        return self.splitStarts.reduce([], { $0 + $1.outsWithEmpty() })
     }
     
-    override func outs(with c: Character?) -> [BaseState] {
-        return (self.backingSplitState! as SplitOutStateDelegate).splitEnding_outs(with: c)
+    override func outs(with c: Character) -> [BaseState] {
+        return self.splitStarts.reduce([], { $0 + $1.outs(with: c) })
     }
     
-    override func connect(_ state: BaseState) { fatalError() }
+    override func connect(_ state: BaseState) {
+        self.splitEnd.connect(state)
+    }
+    
+    override func graphicOuts() -> [BaseState] {
+        return self.splitStarts
+    }
 }
-
-//MARK: - RepeatState
 
 class RepeatState: BaseState {
     let repeatChecker: RepeatChecker
     let repeatingState: BaseState
-    private var endingState: SplitOutState
+    private var endState: InterState = InterState()
     
     init(with quantifier: QuantifierMenifest, repeatingState: BaseState) {
         self.repeatChecker = RepeatChecker(with: quantifier)
         self.repeatingState = repeatingState
-        self.endingState = SplitOutState()
-        super.init(.repeat, isAccepted: false)
-        self.endingState.setBackingSplitState(self)
-        self.repeatingState.connect(self.endingState)
-        
-        if self.repeatChecker.needRepeat() {
-            self.outs.append(contentsOf: [self.repeatingState])
-        } else {
-            self.outs.append(contentsOf: [self.repeatingState, self.endingState])
-        }
-        
-        self.inputsDesp = "ε"
+        self.repeatingState.connect(self.endState)
+        super.init(.RepeatState)
+        self.endState.delegate = self
+        self.isAccepted = false
+        self.acceptanceDesp = "ε"
     }
     
-    override func outs(with c: Character?) -> [BaseState] {
+    override func outsWithEmpty() -> [BaseState] {
+        if self.repeatChecker.needRepeat() {
+            return self.repeatingState.outsWithEmpty()
+        } else {
+            var outs = self.endState.outs.reduce([], { $0 + $1.outsWithEmpty() })
+            if self.repeatChecker.canRepeat() {
+                outs += self.repeatingState.outsWithEmpty()
+            }
+            return outs
+        }
+    }
+    
+    override func outs(with c: Character) -> [BaseState] {
         if self.repeatChecker.needRepeat() {
             return self.repeatingState.outs(with: c)
         } else {
             var result: [BaseState] = []
-            let realOuts = self.endingState.outs.reduce([]) { return $0 + $1.outs(with: nil) }
+            let realOuts = self.endState.outs.reduce([]) { return $0 + $1.outs(with: c) }
             result += realOuts
             if self.repeatChecker.canRepeat() {
                 result += self.repeatingState.outs(with: c)
@@ -169,73 +172,80 @@ class RepeatState: BaseState {
     }
     
     override func connect(_ state: BaseState) {
-        self.endingState.outs.append(state)
-        self.endingState.isAccepted = false
+        self.endState.connect(state)
+    }
+    
+    override func graphicOuts() -> [BaseState] {
+        if self.repeatChecker.canZeroRepeat() {
+            return [self.repeatingState, self.endState]
+        } else {
+            return [self.repeatingState]
+        }
     }
 }
 
-extension RepeatState: SplitOutStateDelegate {
-    func splitEnding_outs(with c: Character?) -> [BaseState] {
+extension RepeatState: InterStateOutDelegate {
+    func interState(_ inter: InterState, outsWith c: Character) -> [BaseState] {
         return self.outs(with: c)
+    }
+    
+    func interStateWithEmpty(_ inter: InterState) -> [BaseState] {
+        return self.outsWithEmpty()
     }
 }
 
 class StatesCreator {
     
     static func createHeadState(from semanticUnits: [SemanticUnit]) throws -> BaseState {
-        //try to extract "|" operator
-        let groupByAlternation = try (semanticUnits.split { $0.type == .Alternation }).map { (sUnits) -> Array<SemanticUnit> in
+        //extract "|"
+        let smticsSepByAlter = try (semanticUnits.split { $0.type == .Alternation }).map { (sUnits) -> Array<SemanticUnit> in
             guard !sUnits.isEmpty else {
                 throw RegExSwiftError.fromType(RegExSwiftErrorType.invaludOperandAroundAlternation)
             }
             return Array(sUnits)
         }
         
-        if groupByAlternation.count > 1 {
-            var splitState = SplitState(primaryOut: try self.createHeadState(from: groupByAlternation[0]),
-                                        secondaryOut: try self.createHeadState(from: groupByAlternation[1]))
-
-            for index in 2..<groupByAlternation.count {
-                splitState = SplitState(primaryOut: splitState,
-                                        secondaryOut: try self.createHeadState(from: groupByAlternation[index]))
-            }
-            return splitState
-        }
+        let headStates = try smticsSepByAlter.map { try self.createStatesWithoutAlter(from: $0) }
+        return headStates.count == 1 ? headStates[0] : SplitState(headStates)
+    }
+    
+    private static func createStatesWithoutAlter(from semanticUnits: [SemanticUnit]) throws -> BaseState {
+        guard !semanticUnits.isEmpty else { fatalError() }
         
         //
         var semanticUnitIte = semanticUnits.makeIterator()
-        var currentState: BaseState?
+        var stateStack: [BaseState] = []
         
         while let semanticUnit = semanticUnitIte.next() {
-            let resultState: BaseState
             switch semanticUnit.type {
             case .Literal:
                 let literalSemantic = semanticUnit as! LiteralSemantic
-                let valueState = ValueState(literalSemantic.literal)
-                resultState = valueState
+                let literalClass = LiteralsClass(type: .Include, characters: Set(arrayLiteral: literalSemantic.literal))
+                let classState = ClassState(literalClass: literalClass)
+                stateStack.last?.connect(classState)
+                stateStack.append(classState)
             case .Class:
                 let classSemantic = (semanticUnit as! ClassSemantic)
-                let classState = ClassState(classSemantic.literalClass)
-                resultState = classState
+                let classState = ClassState(literalClass: classSemantic.literalClass)
+                stateStack.last?.connect(classState)
+                stateStack.append(classState)
             case .Group:
                 let groupSemanticUnit = semanticUnit as! GroupSemantic
+                //there can be alter semantic units in a group
                 let headStateFromGroup = try self.createHeadState(from: groupSemanticUnit.semanticUnits)
-                resultState = headStateFromGroup
+                stateStack.last?.connect(headStateFromGroup)
+                stateStack.append(headStateFromGroup)
             case .Repeating:
                 let repeatingSemantic = semanticUnit as! RepeatingSemantic
                 let stateToRepeat = try self.createHeadState(from: [repeatingSemantic.semanticToRepeat])
                 let repeatingState = RepeatState(with: repeatingSemantic.quantifier, repeatingState: stateToRepeat)
-                resultState = repeatingState
+                stateStack.last?.connect(repeatingState)
+                stateStack.append(repeatingState)
             case .Alternation:
                 fatalError()
             }
-            
-            currentState?.connect(resultState)
-            if currentState == nil {
-                currentState = resultState
-            }
         }
         
-        return  currentState!
+        return  stateStack.first!
     }
 }
