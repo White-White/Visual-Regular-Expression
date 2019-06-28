@@ -67,14 +67,12 @@
     Agnode_t *fromNode;
     fromNode = agnode(g, (char *)[fromNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
     
-    for (id<GraphNode> oneNextNode in [headNode nextNodes]) {
+    for (id<GraphNode> oneNextNode in [headNode normalNextNodes]) {
         NSString *toNodeName = [oneNextNode nodeName];
-        NSString *pathDesp = [oneNextNode inputCharactersDescription];
+        NSString *pathDesp = [headNode pathDeskForNextNode:oneNextNode];
 #if DEBUG
         NSLog(@"从 %@ 连接到 %@，可接受的输入为%@", fromNodeName, toNodeName, pathDesp);
 #endif
-        
-        
         Agnode_t *secondNode;
         secondNode = agnode(g, (char *)[toNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
         
@@ -83,6 +81,19 @@
         
         //recursive
         [self addNodesFor:g withHeadNode:oneNextNode];
+    }
+    
+    for (id<GraphNode> extraNextNode in [headNode extraNextNodes]) {
+        NSString *toNodeName = [extraNextNode nodeName];
+        NSString *pathDesp = [headNode pathDeskForNextNode:extraNextNode];
+#if DEBUG
+        NSLog(@"从 %@ 连接到 %@，可接受的输入为%@", fromNodeName, toNodeName, pathDesp);
+#endif
+        Agnode_t *secondNode;
+        secondNode = agnode(g, (char *)[toNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
+        
+        Agedge_t *edge_A_B = agedge(g, fromNode, secondNode, "bridge", TRUE);
+        agset(edge_A_B, "label", (char *)[pathDesp cStringUsingEncoding:NSUTF8StringEncoding]);
     }
     
     agsafeset(fromNode, "style", "filled", "solid");

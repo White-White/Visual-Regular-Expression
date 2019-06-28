@@ -37,7 +37,6 @@ class BaseState: NSObject {
     //find outs.
     //when input is nil, it's empty input
     func outs(with c: Character?) -> [BaseState] { fatalError() }
-    func possibleOuts() -> [BaseState] { return self.outs }
     
     //Debug
     override var debugDescription: String { return "\(self.stateType)" }
@@ -110,21 +109,25 @@ protocol SplitOutStateDelegate: NSObjectProtocol {
     func splitEnding_outs(with c: Character?) -> [BaseState]
 }
 
-private class SplitOutState: BaseState {
-    weak var delegate: SplitOutStateDelegate?
+class SplitOutState: BaseState {
+    static var outCounter = 0
+    weak var backingSplitState: RepeatState?
+
     init() {
         super.init(.dumb, isAccepted: true)
+        SplitOutState.outCounter += 1
+        self.inputsDesp = "ε"
+    }
+    
+    func setBackingSplitState(_ s: RepeatState) {
+        self.backingSplitState = s
     }
     
     override func outs(with c: Character?) -> [BaseState] {
-        return self.delegate!.splitEnding_outs(with: c)
+        return (self.backingSplitState! as SplitOutStateDelegate).splitEnding_outs(with: c)
     }
-    override func connect(_ state: BaseState) {
-        super.connect(state)
-        if self.outs.isEmpty {
-            self.outs.append(state)
-        }
-    }
+    
+    override func connect(_ state: BaseState) { fatalError() }
 }
 
 //MARK: - RepeatState
@@ -139,9 +142,16 @@ class RepeatState: BaseState {
         self.repeatingState = repeatingState
         self.endingState = SplitOutState()
         super.init(.repeat, isAccepted: false)
-        self.endingState.delegate = self
+        self.endingState.setBackingSplitState(self)
         self.repeatingState.connect(self.endingState)
-        self.outs.append(contentsOf: [self.repeatingState, self.endingState])
+        
+        if self.repeatChecker.needRepeat() {
+            self.outs.append(contentsOf: [self.repeatingState])
+        } else {
+            self.outs.append(contentsOf: [self.repeatingState, self.endingState])
+        }
+        
+        self.inputsDesp = "ε"
     }
     
     override func outs(with c: Character?) -> [BaseState] {
@@ -159,7 +169,8 @@ class RepeatState: BaseState {
     }
     
     override func connect(_ state: BaseState) {
-        self.endingState.connect(state)
+        self.endingState.outs.append(state)
+        self.endingState.isAccepted = false
     }
 }
 
@@ -212,7 +223,8 @@ class StatesCreator {
                 resultState = headStateFromGroup
             case .Repeating:
                 let repeatingSemantic = semanticUnit as! RepeatingSemantic
-                let repeatingState = RepeatState(with: repeatingSemantic.quantifier, repeatingState: try self.createHeadState(from: [repeatingSemantic.semanticToRepeat]))
+                let stateToRepeat = try self.createHeadState(from: [repeatingSemantic.semanticToRepeat])
+                let repeatingState = RepeatState(with: repeatingSemantic.quantifier, repeatingState: stateToRepeat)
                 resultState = repeatingState
             case .Alternation:
                 fatalError()
