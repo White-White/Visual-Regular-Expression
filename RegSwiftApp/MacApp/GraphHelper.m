@@ -24,7 +24,7 @@
     [RegSwift reset];
     RegSwift *regSwift = [[RegSwift alloc] initWithPattern:regularExpression error:error];
     if (*error) { return nil; }
-    id<GraphNode> headNode = [regSwift getNodeHead];
+    id<GraphNode> headNode = [regSwift getStartNode];
     NSString *path = [[[self alloc] init] p_createPNGWithHeadNode:headNode];
     return path;
 }
@@ -85,10 +85,8 @@
         [self addNodesFor:g withHeadNode:oneNextNode];
     }
     
-    if ([headNode highLighted]) {
-        agsafeset(fromNode, "style", "filled", "solid");
-        agsafeset(fromNode, "fillcolor", "#fd8c25", "lightgrey");
-    }
+    agsafeset(fromNode, "style", "filled", "solid");
+    agsafeset(fromNode, "fillcolor", (char *)[[headNode nodeFillColorHex] cStringUsingEncoding:NSUTF8StringEncoding], "lightgrey");
 }
 
 @end

@@ -12,7 +12,7 @@ import Foundation
 public protocol GraphNode {
     var nodeName: String { get }
     var inputCharactersDescription: String { get }
-    var highLighted: Bool { get }
+    var nodeFillColorHex: String { get }
     var nextNodes: [GraphNode] { get }
 }
 
@@ -26,6 +26,13 @@ extension BaseState: GraphNode {
         }
     }
     var inputCharactersDescription: String { return self.inputsDesp ?? "NEEDFIX" }
-    var highLighted: Bool { return self.isAccepted }
+    
+    var nodeFillColorHex: String {
+        if self is StartState {
+            return "#2cbb4d" //some green
+        }
+        return self.isAccepted ? "#fd8c25" : "#ffffff" //some orange or white
+    }
+    
     var nextNodes: [GraphNode] { return self.possibleOuts() as [GraphNode] }
 }

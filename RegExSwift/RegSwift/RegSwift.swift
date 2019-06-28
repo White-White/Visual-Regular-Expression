@@ -18,7 +18,7 @@ struct StateNameCreator {
 }
 
 public class RegSwift: NSObject {
-    private let headState: BaseState
+    private let startState: StartState
     private let parrern: String
     
     static var nameCreator: StateNameCreator?
@@ -31,7 +31,9 @@ public class RegSwift: NSObject {
         let parser = try Parser(lexemes: lexemes)
         let semanticUnits = try parser.getSemanticUnits()
         let headState = try StatesCreator.createHeadState(from: semanticUnits)
-        self.headState = headState
+        let startState = StartState()
+        startState.connect(headState)
+        self.startState = startState
     }
     
     func match(_ m: String) throws -> Bool {
@@ -39,7 +41,7 @@ public class RegSwift: NSObject {
         print("目标string: \(m)")
         
         guard !m.isEmpty else { throw RegExSwiftError("Error: Target string is empty") }
-        var evolve: [BaseState] = [headState]
+        var evolve: [BaseState] = [self.startState]
         for character in m {
             print("开始尝试匹配\(character)")
             print("当前结果: evolve包含\(evolve.count)个状态:")
@@ -77,7 +79,7 @@ extension RegSwift {
     }
     
     @objc
-    public func getNodeHead() -> GraphNode {
-        return self.headState as GraphNode
+    public func getStartNode() -> GraphNode {
+        return self.startState
     }
 }

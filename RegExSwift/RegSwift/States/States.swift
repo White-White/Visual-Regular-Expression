@@ -9,6 +9,7 @@
 import Foundation
 
 enum StateType {
+    case start
     case value
     case dumb
     case split
@@ -40,6 +41,23 @@ class BaseState: NSObject {
     
     //Debug
     override var debugDescription: String { return "\(self.stateType)" }
+}
+
+class StartState: BaseState {
+    init() {
+        super.init(.start, isAccepted: false)
+        self.stateName = "Go"
+    }
+    override func outs(with c: Character?) -> [BaseState] {
+        if c != nil { fatalError() }
+        return self.outs
+    }
+    override func connect(_ state: BaseState) {
+        super.connect(state)
+        if self.outs.isEmpty {
+            self.outs.append(state)
+        }
+    }
 }
 
 class ClassState: BaseState {
