@@ -11,22 +11,40 @@
 #import "gvc.h"
 #import "gvplugin.h"
 
-@implementation GraphHelper
+@implementation GraphHelper {
+    RegSwift *_regSwift;
+}
 
-+ (NSString *)createPNGWithRegularExpression: (NSString *)regularExpression error: (NSError * _Nullable __autoreleasing *)error {
-    
++ (GraphHelper *)shared {
+    static GraphHelper* instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSURL *librariesDirURL = [[[NSBundle mainBundle] bundleURL] URLByAppendingPathComponent:@"Contents/Frameworks/" isDirectory:YES];
         setenv("GVBINDIR", (char*)[[librariesDirURL path] UTF8String], 1);
+        instance = [[GraphHelper alloc] initPrivate];
     });
     
-    [RegSwift reset];
-    RegSwift *regSwift = [[RegSwift alloc] initWithPattern:regularExpression error:error];
-    if (*error) { return nil; }
-    id<GraphNode> headNode = [regSwift getStartNode];
-    NSString *path = [[[self alloc] init] p_createPNGWithHeadNode:headNode];
-    return path;
+    return instance;
+}
+
+- (instancetype)init {
+    @throw @"User [GraphHelper shared]";
+}
+
+- (instancetype)initPrivate {
+    self = [super init];
+    return self;
+}
+
+
+- (void)resetWithRegEx:(NSString *)regEx match:(NSString *)match error:(NSError *__autoreleasing  _Nullable *)error {
+    _regSwift = [[RegSwift alloc] initWithPattern:regEx match:match error:error];
+}
+
+- (NSImage *)createPNG {
+    id<GraphNode> headNode = [_regSwift getStartNode];
+    NSString *path = [self p_createPNGWithHeadNode:headNode];
+    return [[NSImage alloc] initWithContentsOfFile:path];
 }
 
 - (NSString *)p_createPNGWithHeadNode: (id<GraphNode>)headNode {
@@ -63,17 +81,14 @@
 }
 
 - (void)addNodesFor: (graph_t *)g withHeadNode: (id<GraphNode>)headNode {
-    NSString *fromNodeName = [headNode nodeName];
+    NSString *fromNodeName = [_regSwift nameFor:headNode];
     Agnode_t *fromNode;
     fromNode = agnode(g, (char *)[fromNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
     
     NSArray <id<GraphNode>>* normalNextNodes = [headNode normalNextNodes];
     for (id<GraphNode> oneNextNode in normalNextNodes) {
-        NSString *toNodeName = [oneNextNode nodeName];
+        NSString *toNodeName = [_regSwift nameFor:oneNextNode];
         NSString *pathDesp = [headNode pathDespForNextNode:oneNextNode];
-#if DEBUG
-        NSLog(@"从 %@ 连接到 %@，可接受的输入为%@", fromNodeName, toNodeName, pathDesp);
-#endif
         Agnode_t *secondNode;
         secondNode = agnode(g, (char *)[toNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
         
@@ -85,11 +100,8 @@
     }
     
     for (id<GraphNode> extraNextNode in [headNode extraNextNodes]) {
-        NSString *toNodeName = [extraNextNode nodeName];
+        NSString *toNodeName = [_regSwift nameFor:extraNextNode];
         NSString *pathDesp = [headNode pathDespForNextNode:extraNextNode];
-#if DEBUG
-        NSLog(@"从 %@ 连接到 %@，可接受的输入为%@", fromNodeName, toNodeName, pathDesp);
-#endif
         Agnode_t *secondNode;
         secondNode = agnode(g, (char *)[toNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
         
@@ -97,8 +109,33 @@
         agset(edge_A_B, "label", (char *)[pathDesp cStringUsingEncoding:NSUTF8StringEncoding]);
     }
     
+    //Node fill color
     agsafeset(fromNode, "style", "filled", "solid");
     agsafeset(fromNode, "fillcolor", (char *)[[headNode nodeFillColorHex] cStringUsingEncoding:NSUTF8StringEncoding], "lightgrey");
+    
+    //Node size
+    agsafeset(fromNode, "fixedsize", "true", "false");
+    agsafeset(fromNode, "width", "0.8", "0.75");
+    agsafeset(fromNode, "height", "0.8", "0.75");
+    
+    //font size
+    agsafeset(fromNode, "fontsize", "20", "14");
+}
+
+- (void)forward {
+    [_regSwift forward];
+}
+
+- (NSInteger)currentMatchIndex {
+    return [_regSwift currentMatchIndex];
+}
+
+- (RegSwiftMatchStatus)matchStatus {
+    if ([_regSwift matchEnd]) {
+        return [_regSwift didFindMatch] ? RegSwiftMatchSuccess : RegSwiftMatchNormal;
+    } else {
+        return RegSwiftMatchNormal;
+    }
 }
 
 @end

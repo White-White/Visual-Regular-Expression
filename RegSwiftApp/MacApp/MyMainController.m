@@ -14,7 +14,7 @@
 
 @property (strong, nonatomic) NSLabel *errorLabel;
 @property (strong, nonatomic) NSImageView *imageView;;
-
+@property (strong, nonatomic) NSLabel *evolvingString;
 
 @end
 
@@ -22,6 +22,10 @@
     NSTextField *regInpuArea;
     NSTextField *matchInputArea;
     NSButton *confirmButton;
+    NSButton *evolveButton;
+    
+    NSString *_re;
+    NSString *_match;
 }
 
 
@@ -49,11 +53,16 @@
     [self.view addSubview:matchInputArea];
     
     confirmButton = [[NSButton alloc] initWithFrame:NSMakeRect(550, 12, 80, 30)];
-    [confirmButton setTitle:@"Go"];
+    [confirmButton setTitle:@"Create NFA"];
     confirmButton.target = self;
     confirmButton.action = @selector(didClickConfirm);
     [self.view addSubview:confirmButton];
-    // Do view setup here.
+    
+    evolveButton = [[NSButton alloc] initWithFrame:NSMakeRect(642, 12, 80, 30)];
+    [evolveButton setTitle:@"Evolve"];
+    evolveButton.target = self;
+    evolveButton.action = @selector(didClickEolveButton);
+    [self.view addSubview:evolveButton];
 }
 
 - (void)didClickConfirm {
@@ -73,20 +82,66 @@
         return;
     }
     
+    _re = rg;
+    _match = match;
+    
     NSError *error;
-    NSString *pngPath = [GraphHelper createPNGWithRegularExpression:rg error:&error];
+    [[GraphHelper shared] resetWithRegEx:_re match:_match error:&error];
     if (error) {
         [self.errorLabel setText:[error localizedDescription]];
         self.errorLabel.hidden = NO;
         return;
     } else {
-        [self.imageView setImage:[[NSImage alloc] initWithContentsOfFile:pngPath]];
+        [self updateImage];
     }
+    
+    [self.evolvingString setAttributedStringValue:[[NSAttributedString alloc] initWithString:_match]];
+}
+
+- (void)didClickEolveButton {
+    self.errorLabel.hidden = YES;
+    
+    NSString *rg = _re;
+    if (!rg || rg.length == 0) {
+        [self.errorLabel setText:@"Please create one NFA first."];
+        self.errorLabel.hidden = NO;
+        return;
+    }
+    
+    switch ([[GraphHelper shared] matchStatus]) {
+        case RegSwiftMatchSuccess: {
+            NSMutableAttributedString *attri = [[NSMutableAttributedString alloc] initWithString:_match];
+            [attri setAttributes:@{NSForegroundColorAttributeName: [NSColor greenColor]}
+                           range:NSMakeRange(0, [[GraphHelper shared] currentMatchIndex])];
+            [self.evolvingString setAttributedStringValue:attri];
+            
+            [self.errorLabel setText:@"Match success!"];
+            self.errorLabel.hidden = NO;
+        }
+            break;
+        case RegSwiftMatchFail: {
+            [self.errorLabel setText:@"Match fail!"];
+            self.errorLabel.hidden = NO;
+        }
+            break;
+        case RegSwiftMatchNormal: {
+            NSMutableAttributedString *attri = [[NSMutableAttributedString alloc] initWithString:_match];
+            [attri setAttributes:@{NSForegroundColorAttributeName: [NSColor greenColor]}
+                           range:NSMakeRange(0, [[GraphHelper shared] currentMatchIndex])];
+            [attri setAttributes:@{NSForegroundColorAttributeName: [NSColor orangeColor]}
+                           range:NSMakeRange([[GraphHelper shared] currentMatchIndex], 1)];
+            [self.evolvingString setAttributedStringValue:attri];
+        }
+            break;
+    }
+    
+    [[GraphHelper shared] forward];
+    [self updateImage];   
 }
 
 - (NSLabel *)errorLabel {
     if (!_errorLabel) {
-        _errorLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(650, 5, 400, 50)];
+        _errorLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(550, 50, 400, 18)];
         [_errorLabel.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
         [_errorLabel setTextColor:[NSColor redColor]];
         _errorLabel.hidden = YES;
@@ -97,13 +152,29 @@
 
 - (NSImageView *)imageView {
     if (!_imageView) {
-        _imageView = [[NSImageView alloc] initWithFrame:NSMakeRect(12, 250, 1200, 600)];
+        _imageView = [[NSImageView alloc] initWithFrame:NSMakeRect(12, 72, self.view.bounds.size.width - 24, self.view.bounds.size.height - 12 - 72)];
         [_imageView setWantsLayer:YES];
         [_imageView.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
         [_imageView.layer setContentsGravity:kCAGravityResizeAspectFill];
         [self.view addSubview:_imageView];
     }
     return _imageView;
+}
+
+- (void)updateImage {
+    NSImage *png = [[GraphHelper shared] createPNG];
+    [self.imageView setImage:png];
+}
+
+- (NSLabel *)evolvingString {
+    if (!_evolvingString) {
+        _evolvingString = [[NSLabel alloc] initWithFrame:NSMakeRect(740, 25, 400, 30)];
+        [_evolvingString.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
+        [_evolvingString setTextColor:[NSColor blackColor]];
+        [_evolvingString setFontSize:24];
+        [self.view addSubview:_evolvingString];
+    }
+    return _evolvingString;
 }
 
 

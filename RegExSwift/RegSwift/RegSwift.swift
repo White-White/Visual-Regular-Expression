@@ -11,74 +11,93 @@ import Foundation
 struct StateNameCreator {
     var start = 0
     mutating func nextName() -> String {
-        let temp = start
         start += 1
-        return "s\(temp)"
+        return "s\(start)"
+    }
+    
+    var finStart = 0
+    mutating func nextFin() -> String {
+        finStart += 1
+        return "FIN\(finStart)"
     }
 }
 
 public class RegSwift: NSObject {
     private let startState: InterState = InterState()
     private let parrern: String
-    
-    static var nameCreator: StateNameCreator?
+    private let match: String
+    private var nameCreator: StateNameCreator = StateNameCreator()
     
     @objc
-    public init(pattern: String) throws {
+    public private(set) var currentMatchIndex: Int = 0
+    
+    //evolve
+    private var doEmptyInput = true
+    private var isFirstRun = true
+    private lazy var evolve: [BaseState] = [self.startState]
+    
+    @objc
+    public init(pattern: String, match: String) throws {
         self.parrern = pattern
+        self.match = match
         let lexer = Lexer(pattern: pattern)
         let lexemes = try lexer.createLexemes()
         let parser = try Parser(lexemes: lexemes)
         let semanticUnits = try parser.getSemanticUnits()
         let headState = try StatesCreator.createHeadState(from: semanticUnits)
-        startState.stateName = "Go"
+        startState.stateName = "Start"
+        startState.styleType = .Start
         startState.connect(headState)
+        super.init()
     }
     
-    func match(_ m: String) throws -> Bool {
-        print("开始匹配。预置pattern: \(self.parrern)")
-        print("目标string: \(m)")
-        
-        guard !m.isEmpty else { throw RegExSwiftError("Error: Target string is empty") }
-        var evolve: [BaseState] = [self.startState]
-        for character in m {
-            print("开始尝试匹配\(character)")
-            print("当前结果: evolve包含\(evolve.count)个状态:")
-            evolve.forEach { print($0) }
-            
-            //e演进
-            print("ε 演进开始")
-            evolve = evolve.flatMap { $0.outsWithEmpty() }
-            print("ε 演进结果: evolve包含\(evolve.count)个状态:")
-            evolve.forEach { print($0) }
-            
-            //character演进
-            print("\(character) 演进开始")
-            evolve = evolve.flatMap { $0.outs(with: character) }
-            print("\(character) 演进结果: evolve包含\(evolve.count)个状态:")
-            evolve.forEach { print($0) }
-            
-            //结果检查
-            if evolve.contains(where: { $0.isAccepted }) {
-                print("本次演进找到接受结果，演进结束")
-                return true
-            }
+    @objc public func matchEnd() -> Bool {
+        return currentMatchIndex < match.count
+    }
+    
+    @objc public func didFindMatch() -> Bool {
+        return evolve.reduce(false, { $0 || $1.isAccepted })
+    }
+    
+    @objc public func forward() {
+        evolve.forEach { $0.styleType = .Normal }
+        if (doEmptyInput) {
+            evolve = evolve.flatMap { $0.outs(with: nil) }
+        } else {
+            let c =  Array(match)[currentMatchIndex]
+            evolve = evolve.flatMap { $0.outs(with: c) }
+            currentMatchIndex += 1
         }
+        evolve.forEach { $0.styleType = .Highlighted }
         
-        print("本次匹配未找到接受结果")
-        return false
+//        if (isFirstRun) {
+//            isFirstRun = false;
+//            doEmptyInput = true;
+//        } else {
+            doEmptyInput = !doEmptyInput
+//        }
     }
 }
 
 //MARK: - Nodes
 extension RegSwift {
     @objc
-    public static func reset() {
-        RegSwift.nameCreator = StateNameCreator()
+    public func getStartNode() -> GraphNode {
+        return self.startState
     }
     
     @objc
-    public func getStartNode() -> GraphNode {
-        return self.startState
+    public func name(for o: AnyObject) -> String {
+        let state = o as! BaseState
+        if let stateName = state.stateName {
+            return stateName
+        } else {
+            if (state.isAccepted) {
+                state.stateName = nameCreator.nextFin()
+                return state.stateName!
+            }
+            state.stateName = nameCreator.nextName()
+            return state.stateName!
+        }
     }
 }

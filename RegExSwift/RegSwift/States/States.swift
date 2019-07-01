@@ -15,11 +15,19 @@ enum StateType {
     case SplitState
 }
 
+enum NodeStyleType {
+    case Start
+    case Normal
+    case Highlighted
+}
+
 class BaseState {
     var stateName: String?
     var acceptanceDesp: String?
     var stateType: StateType
+    
     var isAccepted: Bool = true
+    var styleType: NodeStyleType = NodeStyleType.Normal
     
     init(_ type: StateType) {
         self.stateType = type
@@ -27,15 +35,14 @@ class BaseState {
     
     var outs: [BaseState] = []
     
-    //empty input
-    func outsWithEmpty() -> [BaseState] { fatalError() }
-    
     //find outs
-    func outs(with c: Character) -> [BaseState] {
-        return outs.filter { $0.canAccept(c: c) }
+    func canAccept(c: Character?) -> Bool { return false }
+    func outs(with c: Character?) -> [BaseState] {
+        if self.canAccept(c: c) {
+            return [self] + self.outs.reduce([], { $0 + $1.outs(with: c) })
+        }
+        return []
     }
-    
-    func canAccept(c: Character) -> Bool { fatalError() }
     
     //connect with other state
     func connect(_ state: BaseState) { fatalError() }
@@ -45,8 +52,7 @@ class BaseState {
 }
 
 protocol InterStateOutDelegate where Self: AnyObject {
-    func interState(_ inter: InterState, outsWith c: Character) -> [BaseState]
-    func interStateWithEmpty(_ inter: InterState) -> [BaseState]
+    func interState(_ inter: InterState, outsWith c: Character?) -> [BaseState]
 }
 
 class InterState: BaseState {
@@ -57,18 +63,12 @@ class InterState: BaseState {
         self.acceptanceDesp = "ε"
     }
     
-    override func outs(with c: Character) -> [BaseState] {
+    override func canAccept(c: Character?) -> Bool { return c == nil }
+    override func outs(with c: Character?) -> [BaseState] {
         if let delegate = delegate {
             return delegate.interState(self, outsWith: c)
         }
         return super.outs(with: c)
-    }
-    
-    override func outsWithEmpty() -> [BaseState] {
-        if let delegate = delegate {
-            return delegate.interStateWithEmpty(self)
-        }
-        return self.outs.reduce([], { $0 + $1.outsWithEmpty() })
     }
     
     override func connect(_ state: BaseState) {
@@ -84,49 +84,40 @@ class ClassState: BaseState {
         super.init(.ClassState)
         self.acceptanceDesp = literalClass.criteriaDesp()
     }
-    
-    override func outsWithEmpty() -> [BaseState] { return [self] }
-    
-    override func canAccept(c: Character) -> Bool {
+
+    override func canAccept(c: Character?) -> Bool {
+        guard let c = c else { return false }
         return self.literalClass.accepts(c)
     }
     
     override func connect(_ state: BaseState) {
         self.isAccepted = false
-        self.outs.append(state)
+        if self.outs.isEmpty {
+            self.outs.append(state)
+        } else {
+            self.outs.forEach { $0.connect(state) }
+        }
     }
 }
 
 class SplitState: BaseState {
-    var splitStarts: [InterState] = []
+//    var splitStarts: [InterState] = []
     let splitEnd: InterState = InterState()
     
     init(_ outs: [BaseState]) {
         super.init(.SplitState)
         self.isAccepted = false
         outs.forEach {
-            let splitStart = InterState()
-            splitStart.connect($0)
-            self.splitStarts.append(splitStart)
             $0.connect(self.splitEnd)
+            self.outs.append($0)
         }
         self.acceptanceDesp = "ε"
     }
     
-    override func outsWithEmpty() -> [BaseState] {
-        return self.splitStarts.reduce([], { $0 + $1.outsWithEmpty() })
-    }
-    
-    override func outs(with c: Character) -> [BaseState] {
-        return self.splitStarts.reduce([], { $0 + $1.outs(with: c) })
-    }
+    override func canAccept(c: Character?) -> Bool { return c == nil }
     
     override func connect(_ state: BaseState) {
         self.splitEnd.connect(state)
-    }
-    
-    override func graphicOuts() -> [BaseState] {
-        return self.splitStarts
     }
 }
 
@@ -144,31 +135,41 @@ class RepeatState: BaseState {
         self.isAccepted = false
         self.acceptanceDesp = "ε"
     }
+//
+//    override func outsWithEmpty() -> [BaseState] {
+//        if self.repeatChecker.needRepeat() {
+//            return self.repeatingState.outsWithEmpty()
+//        } else {
+//            var outs = self.endState.outs.reduce([], { $0 + $1.outsWithEmpty() })
+//            if self.repeatChecker.canRepeat() {
+//                outs += self.repeatingState.outsWithEmpty()
+//            }
+//            return outs
+//        }
+//    }
     
-    override func outsWithEmpty() -> [BaseState] {
-        if self.repeatChecker.needRepeat() {
-            return self.repeatingState.outsWithEmpty()
-        } else {
-            var outs = self.endState.outs.reduce([], { $0 + $1.outsWithEmpty() })
-            if self.repeatChecker.canRepeat() {
-                outs += self.repeatingState.outsWithEmpty()
-            }
-            return outs
-        }
+    override func canAccept(c: Character?) -> Bool {
+        return c == nil;
     }
-    
-    override func outs(with c: Character) -> [BaseState] {
+
+    override func outs(with c: Character?) -> [BaseState] {
+        var ret: [BaseState] = []
         if self.repeatChecker.needRepeat() {
-            return self.repeatingState.outs(with: c)
-        } else {
-            var result: [BaseState] = []
-            let realOuts = self.endState.outs.reduce([]) { return $0 + $1.outs(with: c) }
-            result += realOuts
-            if self.repeatChecker.canRepeat() {
-                result += self.repeatingState.outs(with: c)
+            if c == nil {
+                ret.append(self)
             }
-            return result
+            ret += self.repeatingState.outs(with: c)
+        } else { //dont need repeat
+            if c == nil {
+                ret.append(self)
+                ret.append(self.endState)
+                ret += self.endState.outs.reduce([], {$0 + $1.outs(with: c)})
+            }
+            if self.repeatChecker.canRepeat() {
+                ret += self.repeatingState.outs(with: c)
+            }
         }
+        return ret;
     }
     
     override func connect(_ state: BaseState) {
@@ -185,12 +186,25 @@ class RepeatState: BaseState {
 }
 
 extension RepeatState: InterStateOutDelegate {
-    func interState(_ inter: InterState, outsWith c: Character) -> [BaseState] {
-        return self.outs(with: c)
-    }
-    
-    func interStateWithEmpty(_ inter: InterState) -> [BaseState] {
-        return self.outsWithEmpty()
+    func interState(_ inter: InterState, outsWith c: Character?) -> [BaseState] {
+//        var ret: [BaseState] = []
+//        if self.repeatChecker.needRepeat() {
+//            if c == nil {
+//                ret.append(self)
+//            }
+//            ret += self.repeatingState.outs(with: c)
+//        } else { //dont need repeat
+//            if c == nil {
+//                ret.append(self)
+//                ret.append(self.endState)
+//                ret += self.endState.outs(with: c)
+//            }
+//            if self.repeatChecker.canRepeat() {
+//                ret += self.repeatingState.outs(with: c)
+//            }
+//        }
+//        return ret;
+        return self.outs(with: c);
     }
 }
 

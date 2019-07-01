@@ -10,7 +10,6 @@ import Foundation
 
 @objc
 public protocol GraphNode {
-    var nodeName: String { get }
     var nodeFillColorHex: String { get }
     
     var normalNextNodes: [GraphNode] { get }
@@ -19,21 +18,19 @@ public protocol GraphNode {
 }
 
 extension BaseState: GraphNode {
-    var nodeName: String {
-        if let stateName = self.stateName {
-            return stateName
-        } else {
-            self.stateName = RegSwift.nameCreator!.nextName()
-            return self.stateName!
-        }
-    }
-    
     var nodeFillColorHex: String {
-//        if self is StartState {
-//            return "#2cbb4d" //some green
-//        }
-        let colorDesp = self.isAccepted ? "#fd8c25" : "#ffffff" //some orange or white
-        return colorDesp
+        if (self.isAccepted) {
+            return "#ffffff";
+        } else {
+            switch self.styleType {
+            case .Start:
+                return "#ffffff";
+            case .Normal:
+                return "#ffffff";
+            case .Highlighted:
+                return "#fd8c25";
+            }
+        }
     }
     
     var normalNextNodes: [GraphNode] {
