@@ -62,10 +62,10 @@ public class RegSwift: NSObject {
     @objc public func forward() {
         evolve.forEach { $0.styleType = .Normal }
         if (doEmptyInput) {
-            evolve = evolve.flatMap { $0.outs(with: nil) }
+            evolve = evolve.flatMap { $0.outsFor(input: nil) }
         } else {
             let c =  Array(match)[currentMatchIndex]
-            evolve = evolve.flatMap { $0.outs(with: c) }
+            evolve = evolve.flatMap { $0.outsFor(input: c) }
             currentMatchIndex += 1
         }
         evolve.forEach { $0.styleType = .Highlighted }
