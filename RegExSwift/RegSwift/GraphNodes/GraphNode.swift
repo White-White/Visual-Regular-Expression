@@ -37,13 +37,13 @@ extension BaseState: GraphNode {
         return self.graphicOuts()
     }
     var extraNextNodes: [GraphNode] {
-        guard let repeatOutState = self as? InterState,
+        guard let repeatOutState = self as? DumbState,
             let repeatState = repeatOutState.delegate as? RepeatState else { return [] }
         return [repeatState]
     }
     
     func pathDespForNextNode(_ node: GraphNode) -> String {
-        if let repeatOut = self as? InterState,
+        if let repeatOut = self as? DumbState,
             let repeatState = node as? RepeatState,
             let delegateRepeat = repeatOut.delegate as? RepeatState,
             delegateRepeat === repeatState {

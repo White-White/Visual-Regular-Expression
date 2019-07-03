@@ -9,7 +9,7 @@
 import Foundation
 
 enum StateType {
-    case InterState
+    case DumbState
     case ClassState
     case RepeatState
     case SplitState
@@ -57,38 +57,26 @@ class BaseState {
     }
     
     //connect with other state
-    func connect(_ state: BaseState) { fatalError() }
+    func connect(_ state: BaseState) {
+        self.isAccepted = false
+        if self.outs.isEmpty {
+            self.outs.append(state)
+        } else {
+            self.outs.forEach({ $0.connect(state) })
+        }
+    }
     
     //
     func graphicOuts() -> [BaseState] { return self.outs }
 }
 
-protocol InterStateOutDelegate where Self: AnyObject {
-    func interState(_ inter: InterState, outsWith c: Character?) -> [BaseState]
-}
-
-class InterState: BaseState {
-    weak var delegate: InterStateOutDelegate?
-    
+class DumbState: BaseState {
     init() {
-        super.init(.InterState)
+        super.init(.DumbState)
         self.acceptanceDesp = "ε"
     }
-    
-    override func canAcceptNothing() -> Bool {
-        return true
-    }
-    
-    override func canAccept(input c: Character) -> Bool {
-        return false
-    }
-    
-    
-    
-    override func connect(_ state: BaseState) {
-        self.isAccepted = false
-        self.outs.append(state)
-    }
+    override func canAcceptNothing() -> Bool { return true }
+    override func canAccept(input c: Character) -> Bool { return false }
 }
 
 class ClassState: BaseState {
@@ -102,31 +90,19 @@ class ClassState: BaseState {
     override func canAcceptNothing() -> Bool {
         return false
     }
-    
     override func canAccept(input c: Character) -> Bool {
         return self.literalClass.accepts(c)
-    }
-    
-    override func connect(_ state: BaseState) {
-        self.isAccepted = false
-        if self.outs.isEmpty {
-            self.outs.append(state)
-        } else {
-            self.outs.forEach { $0.connect(state) }
-        }
     }
 }
 
 class SplitState: BaseState {
-    let splitEnd: InterState = InterState()
+    let splitEnd: DumbState = DumbState()
     
     init(_ outs: [BaseState]) {
         super.init(.SplitState)
         self.isAccepted = false
-        outs.forEach {
-            $0.connect(self.splitEnd)
-            self.outs.append($0)
-        }
+        self.outs = outs
+        self.outs.forEach({ $0.connect(self.splitEnd) })
         self.acceptanceDesp = "ε"
     }
     
@@ -143,17 +119,51 @@ class SplitState: BaseState {
     }
 }
 
+class RepeatEndState: BaseState {
+    weak var repeatState: RepeatState!
+    init() {
+        super.init(.DumbState)
+        self.acceptanceDesp = "ε"
+    }
+    override func canAcceptNothing() -> Bool { return true }
+    override func canAccept(input c: Character) -> Bool { return false }
+    override func outsFor(input c: Character) -> [BaseState] {
+        if repeatState.repeatChecker.needRepeat() {
+            return repeatState.repeatingState.outsFor(input: c)
+        } else {
+            var ret = super.outsFor(input: c)
+            if repeatState.repeatChecker.canRepeat() {
+                ret += repeatState.repeatingState.outsFor(input: c)
+            }
+            return ret
+        }
+    }
+    override func outsForNothing() -> [BaseState] {
+        
+        
+        if repeatState.repeatChecker.needRepeat() {
+            return repeatState.repeatingState.outsForNothing()
+        } else {
+            var ret = super.outsForNothing()
+            if repeatState.repeatChecker.canRepeat() {
+                ret += repeatState.repeatingState.outsForNothing()
+            }
+            return ret
+        }
+    }
+}
+
 class RepeatState: BaseState {
     let repeatChecker: RepeatChecker
     let repeatingState: BaseState
-    private var endState: InterState = InterState()
+    private var repeatEnd: RepeatEndState = RepeatEndState()
     
     init(with quantifier: QuantifierMenifest, repeatingState: BaseState) {
         self.repeatChecker = RepeatChecker(with: quantifier)
         self.repeatingState = repeatingState
-        self.repeatingState.connect(self.endState)
+        self.repeatingState.connect(self.repeatEnd)
         super.init(.RepeatState)
-        self.endState.delegate = self
+        self.repeatEnd.repeatState = self
         self.isAccepted = false
         self.acceptanceDesp = "ε"
     }
@@ -168,71 +178,26 @@ class RepeatState: BaseState {
     
     override func outsForNothing() -> [BaseState] {
         if self.repeatChecker.needRepeat() {
-            return self.repeatingState.canAcceptNothing() ? self.repeatingState.outsForNothing() : []
+            return self.repeatingState.outsForNothing()
         } else {
-            let endStateOuts = self.endState.outsForNothing()
-            
-            
-            if self.repeatChecker.canRepeat() {
-                outs += self.repeatingState.outsWithEmpty()
-            }
-            return outs
+            return self.repeatEnd.outsForNothing()
         }
     }
     
-//    override func outsFor(input c: Character?) -> [BaseState] {
-//        var ret: [BaseState] = []
-//        if self.repeatChecker.needRepeat() {
-//            if c == nil {
-//                ret.append(self)
-//            }
-//            ret += self.repeatingState.outsFor(input: c)
-//        } else { //dont need repeat
-//            if c == nil {
-//                ret.append(self)
-//                ret.append(self.endState)
-//                ret += self.endState.outs.reduce([], {$0 + $1.outsFor(input: c)})
-//            }
-//            if self.repeatChecker.canRepeat() {
-//                ret += self.repeatingState.outsFor(input: c)
-//            }
-//        }
-//        return ret;
-//    }
+    override func outsFor(input c: Character) -> [BaseState] {
+        if self.repeatChecker.needRepeat() {
+            return self.repeatingState.outsFor(input: c)
+        } else {
+            return self.repeatEnd.outsFor(input: c)
+        }
+    }
     
     override func connect(_ state: BaseState) {
-        self.endState.connect(state)
+        self.repeatEnd.connect(state)
     }
     
     override func graphicOuts() -> [BaseState] {
-        if self.repeatChecker.canZeroRepeat() {
-            return [self.repeatingState, self.endState]
-        } else {
-            return [self.repeatingState]
-        }
-    }
-}
-
-extension RepeatState: InterStateOutDelegate {
-    func interState(_ inter: InterState, outsWith c: Character?) -> [BaseState] {
-//        var ret: [BaseState] = []
-//        if self.repeatChecker.needRepeat() {
-//            if c == nil {
-//                ret.append(self)
-//            }
-//            ret += self.repeatingState.outs(with: c)
-//        } else { //dont need repeat
-//            if c == nil {
-//                ret.append(self)
-//                ret.append(self.endState)
-//                ret += self.endState.outs(with: c)
-//            }
-//            if self.repeatChecker.canRepeat() {
-//                ret += self.repeatingState.outs(with: c)
-//            }
-//        }
-//        return ret;
-        return self.outsFor(input: c);
+        return [self.repeatingState, self.repeatEnd]
     }
 }
 

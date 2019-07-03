@@ -23,7 +23,7 @@ struct StateNameCreator {
 }
 
 public class RegSwift: NSObject {
-    private let startState: InterState = InterState()
+    private let startState: DumbState = DumbState()
     private let parrern: String
     private let match: String
     private var nameCreator: StateNameCreator = StateNameCreator()
@@ -62,20 +62,13 @@ public class RegSwift: NSObject {
     @objc public func forward() {
         evolve.forEach { $0.styleType = .Normal }
         if (doEmptyInput) {
-            evolve = evolve.flatMap { $0.outsFor(input: nil) }
+            evolve = evolve.flatMap { $0.outsForNothing() }
         } else {
             let c =  Array(match)[currentMatchIndex]
             evolve = evolve.flatMap { $0.outsFor(input: c) }
             currentMatchIndex += 1
         }
         evolve.forEach { $0.styleType = .Highlighted }
-        
-//        if (isFirstRun) {
-//            isFirstRun = false;
-//            doEmptyInput = true;
-//        } else {
-            doEmptyInput = !doEmptyInput
-//        }
     }
 }
 
