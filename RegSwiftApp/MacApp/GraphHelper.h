@@ -29,7 +29,7 @@ typedef NS_ENUM(NSUInteger, RegSwiftMatchStatus) {
 
 - (void)forward;
 - (RegSwiftMatchStatus)matchStatus;
-- (NSInteger)currentMatchIndex;
+- (NSInteger)indexForNextInput;
 
 @end
 

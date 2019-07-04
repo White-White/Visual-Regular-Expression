@@ -48,14 +48,14 @@ class LiteralNFA: BaseNFA {
 }
 
 class SplitNFA: BaseNFA {
+    var outNFAs: [BaseNFA] = []
     init(outNFAs: [BaseNFA]) {
+        self.outNFAs = outNFAs
         let startState = DumbState()
         startState.outs = outNFAs.map({ $0.startState })
-        
         let endState = DumbState()
         outNFAs.forEach({
             $0.getEndState().addOut(endState)
-//            $0.endState.outs = [endState]
         })
         super.init(startState: startState, endState: endState)
     }
@@ -63,21 +63,32 @@ class SplitNFA: BaseNFA {
 
 class RepeatNFA: BaseNFA {
     let repeatChecker: RepeatChecker
+    let repeatingNFA: BaseNFA
+    
     init(repeatingNFA: BaseNFA, quantifier: QuantifierMenifest) {
+        self.repeatingNFA = repeatingNFA
         self.repeatChecker = RepeatChecker(with: quantifier)
-        let startState = DumbState()
-        startState.addOut(repeatingNFA.startState, withWeight: .Important)
+        
         let endState = DumbState()
         repeatingNFA.getEndState().addOut(endState, withWeight: .Important)
-        startState.addOut(endState)
         repeatingNFA.getEndState().conditionalOut = repeatingNFA.startState
+        
+        let startState = DumbState()
+        startState.addOut(repeatingNFA.startState, withWeight: .Important)
+        startState.conditionalOut = endState
+        
         super.init(startState: startState, endState: endState)
         repeatingNFA.getEndState().delegate = self;
+        startState.delegate = self
     }
 }
 
 extension RepeatNFA: ConditionalOutDelegate {
     func canStateGotoConditionalOutForNothing(_ s: BaseState) -> Bool {
-        return self.repeatChecker.canRepeat()
+        if self.startState === s {
+            return !self.repeatChecker.needRepeat()
+        } else {
+            return self.repeatChecker.canRepeat()
+        }
     }
 }

@@ -83,6 +83,7 @@
 - (void)addNodesFor: (graph_t *)g withHeadNode: (id<GraphNode>)headNode {
     NSString *fromNodeName = [headNode nodeName];
     Agnode_t *fromNode = agnode(g, (char *)[fromNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
+    [self _addCommonAttriForNode:fromNode color:(char *)[[headNode nodeFillColorHex] cStringUsingEncoding:NSUTF8StringEncoding]];
     
     NSArray <id<GraphNode>>* normalNextNodes = [headNode normalNextNodes];
     for (id<GraphNode> oneNextNode in normalNextNodes) {
@@ -109,8 +110,6 @@
         agset(edge_A_B, "label", (char *)[pathDesp cStringUsingEncoding:NSUTF8StringEncoding]);
         [self _addCommonAttriForEdge:edge_A_B fromNode:headNode toNode:extraNextNode];
     }
-    
-    [self _addCommonAttriForNode:fromNode color:(char *)[[headNode nodeFillColorHex] cStringUsingEncoding:NSUTF8StringEncoding]];
 }
 
 - (void)_addCommonAttriForEdge: (Agedge_t *) edge fromNode: (id<GraphNode>)fromNode toNode: (id<GraphNode>) toNode {
@@ -140,8 +139,8 @@
     [_regSwift forward];
 }
 
-- (NSInteger)currentMatchIndex {
-    return [_regSwift currentMatchIndex];
+- (NSInteger)indexForNextInput {
+    return [_regSwift indexForNextInput];
 }
 
 - (RegSwiftMatchStatus)matchStatus {

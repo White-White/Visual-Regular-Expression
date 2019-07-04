@@ -24,17 +24,13 @@ extension BaseState: GraphNode {
     var nodeName: String? { return self.stateName }
     
     var nodeFillColorHex: String {
-        if (self.isAcceptingState) {
+        switch self.styleType {
+        case .Start:
             return "#ffffff";
-        } else {
-            switch self.styleType {
-            case .Start:
-                return "#ffffff";
-            case .Normal:
-                return "#ffffff";
-            case .Highlighted:
-                return "#fd8c25";
-            }
+        case .Normal:
+            return "#ffffff";
+        case .Highlighted:
+            return "#fd8c25";
         }
     }
     

@@ -26,7 +26,7 @@ class BaseState: Hashable {
         if let name = _stateName {
             return name
         } else {
-            let newName = "s\(BaseState.counter)"
+            let newName = "\(self.isAcceptingState ? "fin" : "s")\(BaseState.counter)"
             _stateName = newName
             BaseState.counter += 1
             return newName
@@ -48,7 +48,7 @@ class BaseState: Hashable {
     }
     /* Hashable */
     
-    var isAcceptingState: Bool = false
+    var isAcceptingState: Bool { return self.outs.isEmpty }
     var outs: [BaseState] = []
     var weightRecords: [BaseState:PathWeight] = [:]
     
@@ -62,20 +62,27 @@ class BaseState: Hashable {
     func outsFor(input c: Character) -> [BaseState] {
         return self.outs.filter { $0.canAccept(input: c) }
     }
-    func outsForNothing() -> [BaseState] {
-        if !self.canAcceptNothing() { return [] }
-        var ret = [self] + self.outs.reduce([], { $0 + $1.outsForNothing() })
+    func outsForNothing(includeSelf: Bool = false) -> [BaseState] {
+        if self.isAcceptingState { return [self] }
+        
+        var ret: [BaseState] = []
+        let nextOutsAccepteNothing = self.outs.filter({ $0.canAcceptNothing() })
+        if nextOutsAccepteNothing.count != self.outs.count {
+            ret.append(self)
+        } else {
+            ret = self.outs.reduce([], { $0 + $1.outsForNothing(includeSelf: true) })
+        }
+        
         if let delegate = delegate,
             let conditionalOut = conditionalOut,
             delegate.canStateGotoConditionalOutForNothing(self) {
-            ret.append(conditionalOut)
+            ret.append(contentsOf: conditionalOut.outsForNothing(includeSelf: true))
         }
         return ret
     }
     
     func addOut(_ state: BaseState, withWeight w: PathWeight = .Normal) {
         if !(self.outs.contains(where: { $0 === state })) {
-            self.isAcceptingState = false
             self.outs.append(state)
             self.weightRecords[state] = w
         }
