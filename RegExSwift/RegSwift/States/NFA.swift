@@ -23,7 +23,7 @@ class BaseNFA {
 class LiteralNFA: BaseNFA {
     init(_ l: LiteralState) {
         let startState = DumbState()
-        startState.addOut(l)
+        startState.addOut(l, withWeight: .Important)
         super.init(startState: startState, endState: l)
     }
 }
@@ -44,100 +44,18 @@ class RepeatNFA: BaseNFA {
     init(repeatingNFA: BaseNFA, quantifier: QuantifierMenifest) {
         self.repeatChecker = RepeatChecker(with: quantifier)
         let startState = DumbState()
-        startState.addOut(repeatingNFA.startState)
+        startState.addOut(repeatingNFA.startState, withWeight: .Important)
         let endState = DumbState()
-        repeatingNFA.endState.addOut(endState)
+        repeatingNFA.endState.addOut(endState, withWeight: .Important)
         startState.addOut(endState)
-        
-        repeatingNFA.endState.condi
-        repeatingNFA.endState.addOut(repeatingNFA.startState) //potential recursive
+        repeatingNFA.endState.conditionalOut = repeatingNFA.startState
         super.init(startState: startState, endState: endState)
+        repeatingNFA.endState.delegate = self;
     }
 }
 
-
-//class RepeatState: BaseState {
-//    let repeatChecker: RepeatChecker
-//    let repeatingState: BaseState
-//    private var repeatEnd: RepeatEndState = RepeatEndState()
-//
-//    init(with quantifier: QuantifierMenifest, repeatingState: BaseState) {
-//        self.repeatChecker = RepeatChecker(with: quantifier)
-//        self.repeatingState = repeatingState
-//        self.repeatingState.connect(self.repeatEnd)
-//        super.init(.RepeatState)
-//        self.repeatEnd.repeatState = self
-//        self.isAccepted = false
-//        self.acceptanceDesp = "ε"
-//    }
-//
-//    override func canAcceptNothing() -> Bool {
-//        return true
-//    }
-//
-//    override func canAccept(input c: Character) -> Bool {
-//        return false
-//    }
-//
-//    override func outsForNothing() -> [BaseState] {
-//        if self.repeatChecker.needRepeat() {
-//            return self.repeatingState.outsForNothing()
-//        } else {
-//            return self.repeatEnd.outsForNothing()
-//        }
-//    }
-//
-//    override func outsFor(input c: Character) -> [BaseState] {
-//        if self.repeatChecker.needRepeat() {
-//            return self.repeatingState.outsFor(input: c)
-//        } else {
-//            return self.repeatEnd.outsFor(input: c)
-//        }
-//    }
-//
-//    override func connect(_ state: BaseState) {
-//        self.repeatEnd.connect(state)
-//    }
-//
-//    override func graphicOuts() -> [BaseState] {
-//        return [self.repeatingState, self.repeatEnd]
-//    }
-//}
-
-//class RepeatEndState: BaseState {
-//    weak var repeatState: RepeatState!
-//    init() {
-//        super.init(.DumbState)
-//        self.acceptanceDesp = "ε"
-//    }
-//    override func canAcceptNothing() -> Bool { return true }
-//    override func canAccept(input c: Character) -> Bool { return false }
-//    override func outsFor(input c: Character) -> [BaseState] {
-//        if repeatState.repeatChecker.needRepeat() {
-//            return repeatState.repeatingState.outsFor(input: c)
-//        } else {
-//            var ret = super.outsFor(input: c)
-//            if repeatState.repeatChecker.canRepeat() {
-//                ret += repeatState.repeatingState.outsFor(input: c)
-//            }
-//            return ret
-//        }
-//    }
-//    override func outsForNothing() -> [BaseState] {
-//
-//
-//        if repeatState.repeatChecker.needRepeat() {
-//            return repeatState.repeatingState.outsForNothing()
-//        } else {
-//            var ret = super.outsForNothing()
-//            if repeatState.repeatChecker.canRepeat() {
-//                ret += repeatState.repeatingState.outsForNothing()
-//            }
-//            return ret
-//        }
-//    }
-//}
-
-
-
-
+extension RepeatNFA: ConditionalOutDelegate {
+    func canStateGotoConditionalOutForNothing(_ s: BaseState) -> Bool {
+        return self.repeatChecker.canRepeat()
+    }
+}

@@ -81,45 +81,58 @@
 }
 
 - (void)addNodesFor: (graph_t *)g withHeadNode: (id<GraphNode>)headNode {
-    NSString *fromNodeName = [_regSwift nameFor:headNode];
-    Agnode_t *fromNode;
-    fromNode = agnode(g, (char *)[fromNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
+    NSString *fromNodeName = [headNode nodeName];
+    Agnode_t *fromNode = agnode(g, (char *)[fromNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
     
     NSArray <id<GraphNode>>* normalNextNodes = [headNode normalNextNodes];
     for (id<GraphNode> oneNextNode in normalNextNodes) {
-        NSString *toNodeName = [_regSwift nameFor:oneNextNode];
+        NSString *toNodeName = [oneNextNode nodeName];
         NSString *pathDesp = [headNode pathDespForNextNode:oneNextNode];
         Agnode_t *secondNode;
         secondNode = agnode(g, (char *)[toNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
         
         Agedge_t *edge_A_B = agedge(g, fromNode, secondNode, "bridge", TRUE);
         agset(edge_A_B, "label", (char *)[pathDesp cStringUsingEncoding:NSUTF8StringEncoding]);
+        [self _addCommonAttriForEdge:edge_A_B fromNode:headNode toNode:oneNextNode];
         
         //recursive
         [self addNodesFor:g withHeadNode:oneNextNode];
     }
     
     for (id<GraphNode> extraNextNode in [headNode extraNextNodes]) {
-        NSString *toNodeName = [_regSwift nameFor:extraNextNode];
+        NSString *toNodeName = [extraNextNode nodeName];
         NSString *pathDesp = [headNode pathDespForNextNode:extraNextNode];
         Agnode_t *secondNode;
         secondNode = agnode(g, (char *)[toNodeName cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
         
         Agedge_t *edge_A_B = agedge(g, fromNode, secondNode, "bridge", TRUE);
         agset(edge_A_B, "label", (char *)[pathDesp cStringUsingEncoding:NSUTF8StringEncoding]);
+        [self _addCommonAttriForEdge:edge_A_B fromNode:headNode toNode:extraNextNode];
     }
     
+    [self _addCommonAttriForNode:fromNode color:(char *)[[headNode nodeFillColorHex] cStringUsingEncoding:NSUTF8StringEncoding]];
+}
+
+- (void)_addCommonAttriForEdge: (Agedge_t *) edge fromNode: (id<GraphNode>)fromNode toNode: (id<GraphNode>) toNode {
+    NSInteger pathWeight = [fromNode pathWeightForNextNode:toNode];
+    char *weightC = (char *)[[NSString stringWithFormat:@"%ld", (long)pathWeight] cStringUsingEncoding:NSUTF8StringEncoding];
+    agsafeset(edge, "weight", weightC, "1");
+//    agsafeset(edge, "minlen", "2", "1");
+}
+
+- (void)_addCommonAttriForNode: (Agnode_t *)node color: (char *)color {
+    
     //Node fill color
-    agsafeset(fromNode, "style", "filled", "solid");
-    agsafeset(fromNode, "fillcolor", (char *)[[headNode nodeFillColorHex] cStringUsingEncoding:NSUTF8StringEncoding], "lightgrey");
+    agsafeset(node, "style", "filled", "solid");
+    agsafeset(node, "fillcolor", color, "lightgrey");
     
     //Node size
-    agsafeset(fromNode, "fixedsize", "true", "false");
-    agsafeset(fromNode, "width", "0.8", "0.75");
-    agsafeset(fromNode, "height", "0.8", "0.75");
+    agsafeset(node, "fixedsize", "true", "false");
+//    agsafeset(node, "width", "0.8", "0.75");
+//    agsafeset(node, "height", "0.8", "0.75");
     
     //font size
-    agsafeset(fromNode, "fontsize", "20", "14");
+    agsafeset(node, "fontsize", "18", "14");
 }
 
 - (void)forward {

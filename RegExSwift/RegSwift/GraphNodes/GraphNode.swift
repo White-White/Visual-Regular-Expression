@@ -10,16 +10,21 @@ import Foundation
 
 @objc
 public protocol GraphNode {
+    var nodeName: String? { get }
     var nodeFillColorHex: String { get }
     
     var normalNextNodes: [GraphNode] { get }
     var extraNextNodes: [GraphNode] { get }
     func pathDespForNextNode(_ node: GraphNode) -> String
+    func pathWeightForNextNode(_ node: GraphNode) -> Int
 }
 
 extension BaseState: GraphNode {
+    
+    var nodeName: String? { return self.stateName }
+    
     var nodeFillColorHex: String {
-        if (self.isAccepted) {
+        if (self.isAcceptingState) {
             return "#ffffff";
         } else {
             switch self.styleType {
@@ -36,20 +41,23 @@ extension BaseState: GraphNode {
     var normalNextNodes: [GraphNode] {
         return self.graphicOuts()
     }
+    
     var extraNextNodes: [GraphNode] {
-        guard let repeatOutState = self as? DumbState,
-            let repeatState = repeatOutState.delegate as? RepeatState else { return [] }
-        return [repeatState]
+        guard let conditionalOut = self.conditionalOut else { return [] }
+        return [conditionalOut]
     }
     
     func pathDespForNextNode(_ node: GraphNode) -> String {
-        if let repeatOut = self as? DumbState,
-            let repeatState = node as? RepeatState,
-            let delegateRepeat = repeatOut.delegate as? RepeatState,
-            delegateRepeat === repeatState {
-            return "repeat"
-        } else {
-            return (node as! BaseState).acceptanceDesp ?? "NEEDFIX"
+        return (node as! BaseState).acceptanceDesp ?? "NEEDFIX"
+    }
+    
+    func pathWeightForNextNode(_ node: GraphNode) -> Int {
+        guard let weight = self.weightRecords[(node as! BaseState)] else { return 1 }
+        switch weight {
+        case .Important:
+            return 2
+        case .Normal:
+            return 1
         }
     }
 }

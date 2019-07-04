@@ -14,14 +14,43 @@ enum NodeStyleType {
     case Highlighted
 }
 
-class BaseState {
-    var stateName: String?
-    var acceptanceDesp: String?
-    
-    var isAcceptingState: Bool = true
+enum PathWeight {
+    case Important
+    case Normal
+}
+
+class BaseState: Hashable {
+    /* Used for node names, path descriptions */
+    static var counter = 0;
+    var stateName: String? {
+        if let name = _stateName {
+            return name
+        } else {
+            let newName = "s\(BaseState.counter)"
+            _stateName = newName
+            BaseState.counter += 1
+            return newName
+        }
+    }
+    private var _stateName: String?
     var styleType: NodeStyleType = NodeStyleType.Normal
     
+    var acceptanceDesp: String?
+    /* Used for node names, node appearance and path descriptions */
+    
+    /* Hashable */
+    private var uuid = UUID()
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(uuid)
+    }
+    static func == (lhs: BaseState, rhs: BaseState) -> Bool {
+        return lhs.uuid == rhs.uuid
+    }
+    /* Hashable */
+    
+    var isAcceptingState: Bool = true
     var outs: [BaseState] = []
+    var weightRecords: [BaseState:PathWeight] = [:]
     
     //find outs
     func canAccept(input c: Character) -> Bool {
@@ -35,41 +64,42 @@ class BaseState {
     }
     func outsForNothing() -> [BaseState] {
         if !self.canAcceptNothing() { return [] }
-        return [self] + self.outs.reduce([], { $0 + $1.outsForNothing() })
+        var ret = [self] + self.outs.reduce([], { $0 + $1.outsForNothing() })
+        if let delegate = delegate,
+            let conditionalOut = conditionalOut,
+            delegate.canStateGotoConditionalOutForNothing(self) {
+            ret.append(conditionalOut)
+        }
+        return ret
     }
     
-    func addOut(_ state: BaseState) {
+    func addOut(_ state: BaseState, withWeight w: PathWeight = .Normal) {
         if !(self.outs.contains(where: { $0 === state })) {
             self.outs.append(state)
+            self.weightRecords[state] = w
         }
     }
     
     //
     func graphicOuts() -> [BaseState] { return self.outs }
+    
+    
+    //Conditional out
+    weak var delegate: ConditionalOutDelegate?
+    var conditionalOut: BaseState?
 }
 
 protocol ConditionalOutDelegate: AnyObject {
-    func canStateGotoConditionalOut(_ s: BaseState) -> Bool
+    func canStateGotoConditionalOutForNothing(_ s: BaseState) -> Bool
 }
 
 class DumbState: BaseState {
-    weak var delegate: ConditionalOutDelegate?
-    var conditionalOut: BaseState?
     override init() {
         super.init()
         self.acceptanceDesp = "ε"
     }
     override func canAcceptNothing() -> Bool { return true }
     override func canAccept(input c: Character) -> Bool { return false }
-    override func outsForNothing() -> [BaseState] {
-        var ret = super.outsForNothing()
-        if let delegate = delegate,
-            let conditionalOut = conditionalOut,
-            delegate.canStateGotoConditionalOut(self) {
-            ret.append(conditionalOut)
-        }
-        return ret
-    }
 }
 
 class LiteralState: BaseState {

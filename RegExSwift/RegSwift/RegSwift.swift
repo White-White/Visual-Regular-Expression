@@ -8,25 +8,10 @@
 
 import Foundation
 
-struct StateNameCreator {
-    var start = 0
-    mutating func nextName() -> String {
-        start += 1
-        return "s\(start)"
-    }
-    
-    var finStart = 0
-    mutating func nextFin() -> String {
-        finStart += 1
-        return "FIN\(finStart)"
-    }
-}
-
 public class RegSwift: NSObject {
-    private let startState: DumbState = DumbState()
+    private let entryNFA: BaseNFA
     private let parrern: String
     private let match: String
-    private var nameCreator: StateNameCreator = StateNameCreator()
     
     @objc
     public private(set) var currentMatchIndex: Int = 0
@@ -34,7 +19,7 @@ public class RegSwift: NSObject {
     //evolve
     private var doEmptyInput = true
     private var isFirstRun = true
-    private lazy var evolve: [BaseState] = [self.startState]
+    private lazy var evolve: [BaseState] = [self.entryNFA.startState]
     
     @objc
     public init(pattern: String, match: String) throws {
@@ -44,10 +29,7 @@ public class RegSwift: NSObject {
         let lexemes = try lexer.createLexemes()
         let parser = try Parser(lexemes: lexemes)
         let semanticUnits = try parser.getSemanticUnits()
-        let headState = try StatesCreator.createHeadState(from: semanticUnits)
-        startState.stateName = "Start"
-        startState.styleType = .Start
-        startState.connect(headState)
+        self.entryNFA = try NFACreator.createNFA(from: semanticUnits)
         super.init()
     }
     
@@ -56,7 +38,7 @@ public class RegSwift: NSObject {
     }
     
     @objc public func didFindMatch() -> Bool {
-        return evolve.reduce(false, { $0 || $1.isAccepted })
+        return evolve.reduce(false, { $0 || $1.isAcceptingState })
     }
     
     @objc public func forward() {
@@ -76,21 +58,6 @@ public class RegSwift: NSObject {
 extension RegSwift {
     @objc
     public func getStartNode() -> GraphNode {
-        return self.startState
-    }
-    
-    @objc
-    public func name(for o: AnyObject) -> String {
-        let state = o as! BaseState
-        if let stateName = state.stateName {
-            return stateName
-        } else {
-            if (state.isAccepted) {
-                state.stateName = nameCreator.nextFin()
-                return state.stateName!
-            }
-            state.stateName = nameCreator.nextName()
-            return state.stateName!
-        }
+        return self.entryNFA.startState
     }
 }
