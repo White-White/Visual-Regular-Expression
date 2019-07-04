@@ -117,6 +117,7 @@
     NSInteger pathWeight = [fromNode pathWeightForNextNode:toNode];
     char *weightC = (char *)[[NSString stringWithFormat:@"%ld", (long)pathWeight] cStringUsingEncoding:NSUTF8StringEncoding];
     agsafeset(edge, "weight", weightC, "1");
+    agsafeset(edge, "arrowsize", "0.8", "1");
 //    agsafeset(edge, "minlen", "2", "1");
 }
 

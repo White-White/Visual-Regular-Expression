@@ -27,7 +27,7 @@ class NFACreator {
         
         //
         var semanticUnitIte = semanticUnits.makeIterator()
-        var lastNFA: BaseNFA?
+        var nfaStack: [BaseNFA] = []
         
         while let semanticUnit = semanticUnitIte.next() {
             switch semanticUnit.type {
@@ -36,32 +36,32 @@ class NFACreator {
                 let literalClass = LiteralsClass(type: .Include, characters: Set(arrayLiteral: literalSemantic.literal))
                 let classState = LiteralState(literalClass: literalClass)
                 let literalNFA = LiteralNFA(classState)
-                lastNFA?.connect(with: literalNFA)
-                lastNFA = literalNFA
+                nfaStack.last?.connect(with: literalNFA)
+                nfaStack.append(literalNFA)
             case .Class:
                 let classSemantic = (semanticUnit as! ClassSemantic)
                 let classState = LiteralState(literalClass: classSemantic.literalClass)
                 let literalNFA = LiteralNFA(classState)
-                lastNFA?.connect(with: literalNFA)
-                lastNFA = literalNFA
+                nfaStack.last?.connect(with: literalNFA)
+                nfaStack.append(literalNFA)
             case .Group:
                 let groupSemanticUnit = semanticUnit as! GroupSemantic
                 //there can be alter semantic units in a group
                 let nfaFromGroup = try self.createNFA(from: groupSemanticUnit.semanticUnits)
-                lastNFA?.connect(with: nfaFromGroup)
-                lastNFA = nfaFromGroup
+                nfaStack.last?.connect(with: nfaFromGroup)
+                nfaStack.append(nfaFromGroup)
             case .Repeating:
                 let repeatingSemantic = semanticUnit as! RepeatingSemantic
                 let quanti = repeatingSemantic.quantifier
                 let nfaToRepeat = try self.createNFA(from: [repeatingSemantic.semanticToRepeat])
                 let repeatNFA = RepeatNFA(repeatingNFA: nfaToRepeat, quantifier: quanti)
-                lastNFA?.connect(with: repeatNFA)
-                lastNFA = repeatNFA
+                nfaStack.last?.connect(with: repeatNFA)
+                nfaStack.append(repeatNFA)
             case .Alternation:
                 fatalError()
             }
         }
         
-        return  lastNFA!
+        return  nfaStack.first!
     }
 }

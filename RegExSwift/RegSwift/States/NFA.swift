@@ -10,13 +10,32 @@ import Foundation
 
 class BaseNFA {
     let startState: BaseState
-    let endState: BaseState
+    private let endState: BaseState
+    var nextNFA: BaseNFA?
+    
     init(startState: BaseState, endState: BaseState) {
         self.startState = startState
         self.endState = endState
     }
-    func connect(with nextNfa: BaseNFA) {
-        nextNfa.startState.outs.forEach({ endState.addOut($0) })
+    
+    func connect(with nextNFA: BaseNFA) {
+        if let myNextNFA = self.nextNFA {
+            myNextNFA.connect(with: nextNFA)
+            return
+        }
+        
+        self.nextNFA = nextNFA
+        self.endState.outs.removeAll()
+        
+        if let nextLiteralNFA = nextNFA as? LiteralNFA {
+            self.endState.addOut(nextLiteralNFA.endState)
+        } else {
+            self.endState.addOut(nextNFA.startState)
+        }
+    }
+    
+    func getEndState() -> BaseState {
+        return nextNFA?.getEndState() ?? self.endState
     }
 }
 
@@ -32,25 +51,28 @@ class SplitNFA: BaseNFA {
     init(outNFAs: [BaseNFA]) {
         let startState = DumbState()
         startState.outs = outNFAs.map({ $0.startState })
+        
         let endState = DumbState()
-        outNFAs.forEach({ $0.endState.addOut(endState) })
+        outNFAs.forEach({
+            $0.getEndState().addOut(endState)
+//            $0.endState.outs = [endState]
+        })
         super.init(startState: startState, endState: endState)
     }
 }
 
 class RepeatNFA: BaseNFA {
     let repeatChecker: RepeatChecker
-    
     init(repeatingNFA: BaseNFA, quantifier: QuantifierMenifest) {
         self.repeatChecker = RepeatChecker(with: quantifier)
         let startState = DumbState()
         startState.addOut(repeatingNFA.startState, withWeight: .Important)
         let endState = DumbState()
-        repeatingNFA.endState.addOut(endState, withWeight: .Important)
+        repeatingNFA.getEndState().addOut(endState, withWeight: .Important)
         startState.addOut(endState)
-        repeatingNFA.endState.conditionalOut = repeatingNFA.startState
+        repeatingNFA.getEndState().conditionalOut = repeatingNFA.startState
         super.init(startState: startState, endState: endState)
-        repeatingNFA.endState.delegate = self;
+        repeatingNFA.getEndState().delegate = self;
     }
 }
 

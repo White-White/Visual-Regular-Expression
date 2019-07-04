@@ -48,7 +48,7 @@ class BaseState: Hashable {
     }
     /* Hashable */
     
-    var isAcceptingState: Bool = true
+    var isAcceptingState: Bool = false
     var outs: [BaseState] = []
     var weightRecords: [BaseState:PathWeight] = [:]
     
@@ -75,9 +75,18 @@ class BaseState: Hashable {
     
     func addOut(_ state: BaseState, withWeight w: PathWeight = .Normal) {
         if !(self.outs.contains(where: { $0 === state })) {
+            self.isAcceptingState = false
             self.outs.append(state)
             self.weightRecords[state] = w
         }
+    }
+    
+    func addOutToTail(_ state: BaseState, withWeight w: PathWeight = .Normal) {
+        if self.outs.isEmpty {
+            self.addOut(state, withWeight: w)
+            return
+        }
+        self.outs.forEach({ $0.addOutToTail(state, withWeight: w) })
     }
     
     //
