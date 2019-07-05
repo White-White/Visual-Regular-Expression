@@ -66,7 +66,7 @@
     agattr(g, AGEDGE, "label", "temp");
     [self addNodesFor:g withHeadNode:headNode];
 #if DEBUG
-    NSLog(@"图输出如下：\n");
+    NSLog(@"Dot language representation is as follow：\n");
     agwrite(g, stdout);
     NSLog(@"\n");
 #endif
@@ -117,7 +117,6 @@
     char *weightC = (char *)[[NSString stringWithFormat:@"%ld", (long)pathWeight] cStringUsingEncoding:NSUTF8StringEncoding];
     agsafeset(edge, "weight", weightC, "1");
     agsafeset(edge, "arrowsize", "0.8", "1");
-//    agsafeset(edge, "minlen", "2", "1");
 }
 
 - (void)_addCommonAttriForNode: (Agnode_t *)node color: (char *)color {
@@ -128,8 +127,6 @@
     
     //Node size
     agsafeset(node, "fixedsize", "true", "false");
-//    agsafeset(node, "width", "0.8", "0.75");
-//    agsafeset(node, "height", "0.8", "0.75");
     
     //font size
     agsafeset(node, "fontsize", "18", "14");
@@ -139,16 +136,8 @@
     [_regSwift forward];
 }
 
-- (NSInteger)indexForNextInput {
-    return [_regSwift indexForNextInput];
-}
-
-- (RegSwiftMatchStatus)matchStatus {
-    if ([_regSwift matchEnd]) {
-        return [_regSwift didFindMatch] ? RegSwiftMatchSuccess : RegSwiftMatchNormal;
-    } else {
-        return RegSwiftMatchNormal;
-    }
+- (MatchStatusDesp *)matchStatus {
+    return _regSwift.matchStatusDesp;
 }
 
 @end

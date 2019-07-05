@@ -8,6 +8,53 @@
 
 import Foundation
 
+@objc
+public enum MatchStatus: Int {
+    case MatchStart
+    case MatchNormal
+    case MatchFail
+    case MatchSuccess
+}
+
+@objc
+public class MatchStatusDesp: NSObject {
+    @objc public var matchStatus: MatchStatus = .MatchStart
+    @objc public var log: String = "Just get Started!"
+    @objc public var indexForNextInput: Int = 0
+    @objc public private(set) var successedMatch: [String] = []
+
+    var doEmptyInput = true
+    var isFirstRun = true
+    var matchString: String
+    var evolve: [BaseState] {
+        set {
+            self.p_evolve.forEach({ $0.styleType = .Normal })
+            newValue.forEach({ $0.styleType = .Highlighted })
+            self.p_evolve = newValue
+            
+            if newValue.isEmpty {
+                self.matchStatus = .MatchFail
+            } else if newValue.contains(where: { $0.isAcceptingState }) {
+                self.matchStatus = .MatchSuccess
+                let uptoIndex = String.Index.init(utf16Offset: self.indexForNextInput, in: self.matchString)
+                let successMatch = self.matchString.prefix(upTo: uptoIndex)
+                self.successedMatch.append(String(successMatch))
+            } else {
+                self.matchStatus = .MatchNormal
+            }
+        }
+        get {
+            return self.p_evolve
+        }
+    }
+    private var p_evolve: [BaseState]
+    
+    init(_ e: [BaseState], match: String) {
+        self.p_evolve = e
+        self.matchString = match
+    }
+}
+
 public class RegSwift: NSObject {
     
     private let startState: BaseState
@@ -15,13 +62,8 @@ public class RegSwift: NSObject {
     private let patternString: String
     private let matchString: String
     
-    @objc
-    public private(set) var indexForNextInput: Int = 0
-    
-    //evolve
-    private var doEmptyInput = true
-    private var isFirstRun = true
-    private lazy var evolve: [BaseState] = [self.startState]
+    @objc public
+    let matchStatusDesp: MatchStatusDesp
     
     @objc
     public init(pattern: String, match: String) throws {
@@ -33,38 +75,34 @@ public class RegSwift: NSObject {
         let semanticUnits = try parser.getSemanticUnits()
         self.entryNFA = try NFACreator.createNFA(from: semanticUnits)
         self.startState = DumbState()
+        self.startState.styleType = .Highlighted
         self.startState.outs = [self.entryNFA.startState]
+        self.matchStatusDesp = MatchStatusDesp([self.startState], match: self.matchString)
         super.init()
     }
     
-    @objc public func matchEnd() -> Bool {
-        return indexForNextInput < matchString.count
-    }
-    
-    @objc public func didFindMatch() -> Bool {
-        return evolve.reduce(false, { $0 || $1.isAcceptingState })
-    }
-    
     @objc public func forward() {
-        evolve.forEach { $0.styleType = .Normal }
-        if isFirstRun {
-            isFirstRun = false
-            doEmptyInput = true
+        var currentEvolve = self.matchStatusDesp.evolve
+        if self.matchStatusDesp.isFirstRun {
+            self.matchStatusDesp.isFirstRun = false
+            self.matchStatusDesp.doEmptyInput = true
         } else {
             //exclude accepting states from last run
-            evolve = evolve.filter({ !$0.isAcceptingState })
+            currentEvolve = currentEvolve.filter({ !$0.isAcceptingState })
             
-            //
-            if (doEmptyInput) {
-                evolve = evolve.flatMap { $0.outsForNothing() }
+            if (self.matchStatusDesp.doEmptyInput) {
+                currentEvolve = currentEvolve.flatMap { $0.outsForNothing() }
+                self.matchStatusDesp.log = "transition for ε"
             } else {
-                let c =  Array(matchString)[indexForNextInput]
-                evolve = evolve.flatMap { $0.outsFor(input: c) }
-                indexForNextInput += 1
+                let c =  Array(matchString)[self.matchStatusDesp.indexForNextInput]
+                currentEvolve = currentEvolve.flatMap { $0.outsFor(input: c) }
+                self.matchStatusDesp.indexForNextInput += 1
+                self.matchStatusDesp.log = "transition for input: \(c)"
             }
-            doEmptyInput = !doEmptyInput
+            
+            self.matchStatusDesp.evolve = currentEvolve
+            self.matchStatusDesp.doEmptyInput = !self.matchStatusDesp.doEmptyInput
         }
-        evolve.forEach { $0.styleType = .Highlighted }
     }
 }
 

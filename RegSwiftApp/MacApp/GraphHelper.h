@@ -11,12 +11,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM(NSUInteger, RegSwiftMatchStatus) {
-    RegSwiftMatchNormal,
-    RegSwiftMatchFail,
-    RegSwiftMatchSuccess
-};
-
 @interface GraphHelper : NSObject
 
 + (GraphHelper *)shared;
@@ -28,8 +22,7 @@ typedef NS_ENUM(NSUInteger, RegSwiftMatchStatus) {
 - (NSImage *)createPNG;
 
 - (void)forward;
-- (RegSwiftMatchStatus)matchStatus;
-- (NSInteger)indexForNextInput;
+- (MatchStatusDesp *)matchStatus;
 
 @end
 

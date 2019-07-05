@@ -14,8 +14,8 @@
 
 @property (strong, nonatomic) NSLabel *errorLabel;
 @property (strong, nonatomic) NSImageView *imageView;;
-@property (strong, nonatomic) NSLabel *evolvingString;
-@property (strong, nonatomic) NSLabel *evolvedString;
+@property (strong, nonatomic) NSLabel *evolvingStringLabel;
+@property (strong, nonatomic) NSLabel *evolvedStringLabel;
 
 @end
 
@@ -33,45 +33,45 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    NSLabel *regLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(12, 12, 40, 20)];
+    NSLabel *regLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(12, 212, 40, 20)];
     regLabel.maximumNumberOfLines = 1;
     [regLabel setText:@"Regular expression: "];
     [regLabel sizeToFit];
     [self.view addSubview:regLabel];
     
-    regInpuArea = [[NSTextField alloc] initWithFrame:NSMakeRect(regLabel.frame.size.width + 12, 10, 400, 20)];
+    regInpuArea = [[NSTextField alloc] initWithFrame:NSMakeRect(regLabel.frame.size.width + 12, 210, 400, 20)];
     regInpuArea.delegate = self;
     [self.view addSubview:regInpuArea];
     
-    NSLabel *regLabelE = [[NSLabel alloc] initWithFrame:NSMakeRect(12, 40, 40, 20)];
+    NSLabel *regLabelE = [[NSLabel alloc] initWithFrame:NSMakeRect(12, 240, 40, 20)];
     regLabelE.maximumNumberOfLines = 1;
     [regLabelE setText:@"Content to match: "];
     [regLabelE sizeToFit];
     [self.view addSubview:regLabelE];
     
-    matchInputArea = [[NSTextField alloc] initWithFrame:NSMakeRect(regLabel.frame.size.width + 12, 38, 400, 20)];
+    matchInputArea = [[NSTextField alloc] initWithFrame:NSMakeRect(regLabel.frame.size.width + 12, 238, 400, 20)];
     matchInputArea.delegate = self;
     [self.view addSubview:matchInputArea];
     
-    confirmButton = [[NSButton alloc] initWithFrame:NSMakeRect(550, 12, 80, 30)];
+    confirmButton = [[NSButton alloc] initWithFrame:NSMakeRect(550, 212, 80, 30)];
     [confirmButton setTitle:@"Create NFA"];
     confirmButton.target = self;
     confirmButton.action = @selector(didClickConfirm);
     [self.view addSubview:confirmButton];
     
-    evolveButton = [[NSButton alloc] initWithFrame:NSMakeRect(642, 12, 80, 30)];
+    evolveButton = [[NSButton alloc] initWithFrame:NSMakeRect(642, 212, 80, 30)];
     [evolveButton setTitle:@"Evolve"];
     evolveButton.target = self;
     evolveButton.action = @selector(didClickEolveButton);
     [self.view addSubview:evolveButton];
     
-    NSLabel *matchedLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(740, 12, 100, 20)];
+    NSLabel *matchedLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(740, 212, 100, 20)];
     matchedLabel.maximumNumberOfLines = 1;
     [matchedLabel setText:@"Content matched: "];
     [matchedLabel sizeToFit];
     [self.view addSubview:matchedLabel];
     
-    NSLabel *tomatchLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(740, 40, 100, 20)];
+    NSLabel *tomatchLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(740, 240, 100, 20)];
     tomatchLabel.maximumNumberOfLines = 1;
     [tomatchLabel setText:@"To be matched: "];
     [tomatchLabel sizeToFit];
@@ -108,7 +108,7 @@
         [self updateImage];
     }
     
-    [self.evolvingString setAttributedStringValue:[[NSAttributedString alloc] initWithString:_match]];
+    [self.evolvingStringLabel setAttributedStringValue:[[NSAttributedString alloc] initWithString:_match]];
 }
 
 - (void)didClickEolveButton {
@@ -123,43 +123,47 @@
     
     [[GraphHelper shared] forward];
     
-    switch ([[GraphHelper shared] matchStatus]) {
-        case RegSwiftMatchSuccess: {
-            NSMutableAttributedString *attri = [[NSMutableAttributedString alloc] initWithString:_match];
-            [attri setAttributes:@{NSForegroundColorAttributeName: [NSColor greenColor]}
-                           range:NSMakeRange(0, [[GraphHelper shared] indexForNextInput])];
-            [self.evolvingString setAttributedStringValue:attri];
-            
-            [self.errorLabel setText:@"Match success!"];
-            self.errorLabel.hidden = NO;
-        }
-            break;
-        case RegSwiftMatchFail: {
-            [self.errorLabel setText:@"Match fail!"];
-            self.errorLabel.hidden = NO;
-        }
-            break;
-        case RegSwiftMatchNormal: {
-            NSMutableAttributedString *attri = [[NSMutableAttributedString alloc] initWithString:_match];
-//            [attri setAttributes:@{NSForegroundColorAttributeName: [NSColor greenColor]}
-//                           range:NSMakeRange(0, [[GraphHelper shared] indexForNextInput])];
-//            [attri setAttributes:@{NSForegroundColorAttributeName: [NSColor orangeColor]}
-//                           range:NSMakeRange([[GraphHelper shared] indexForNextInput], 1)];
-            [self.evolvingString setAttributedStringValue:attri];
-            
-            NSUInteger index = [[GraphHelper shared] indexForNextInput];
-            NSString *evolved = [_match substringToIndex:index];
-            [self.evolvedString setText:evolved];
-        }
-            break;
-    }
+    MatchStatusDesp *matchStatus = [[GraphHelper shared] matchStatus];
+    [self.errorLabel setText: matchStatus.log];
+    self.errorLabel.hidden = NO;
+    
+    NSUInteger index = [matchStatus indexForNextInput];
+    NSString *evolved = [_match substringToIndex:index];
+    [self.evolvedStringLabel setText:evolved];
+    
+    
+    NSMutableAttributedString *evolvingAttriString = [[NSMutableAttributedString alloc] initWithString:_match];
+    [evolvingAttriString setAttributes:@{NSForegroundColorAttributeName: [NSColor whiteColor]} range:NSMakeRange(0, [matchStatus indexForNextInput])];
+    [self.evolvingStringLabel setAttributedStringValue:evolvingAttriString];
+    
+//    switch (matchStatus.matchStatus) {
+//        case MatchStatusMatchSuccess: {
+//            [self.errorLabel setText: matchStatus.log];
+//            self.errorLabel.hidden = NO;
+//        }
+//            break;
+//        case MatchStatusMatchFail: {
+//            [self.errorLabel setText: matchStatus.log];
+//            self.errorLabel.hidden = NO;
+//        }
+//            break;
+//        case MatchStatusMatchNormal: {
+//            NSUInteger index = [matchStatus indexForNextInput];
+//            NSString *evolved = [_match substringToIndex:index];
+//            [self.evolvedStringLabel setText:evolved];
+//        }
+//            break;
+//        case MatchStatusMatchStart: {
+//            break;
+//        }
+//    }
     
     [self updateImage];   
 }
 
 - (NSLabel *)errorLabel {
     if (!_errorLabel) {
-        _errorLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(550, 50, 400, 18)];
+        _errorLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(550, 250, 400, 18)];
         [_errorLabel.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
         [_errorLabel setTextColor:[NSColor redColor]];
         _errorLabel.hidden = YES;
@@ -170,7 +174,7 @@
 
 - (NSImageView *)imageView {
     if (!_imageView) {
-        _imageView = [[NSImageView alloc] initWithFrame:NSMakeRect(12, 72, self.view.bounds.size.width - 24, self.view.bounds.size.height - 12 - 72)];
+        _imageView = [[NSImageView alloc] initWithFrame:NSMakeRect(12, 72 + 300, self.view.bounds.size.width - 24, self.view.bounds.size.height - 12 - 72 - 300)];
         [_imageView setWantsLayer:YES];
         [_imageView.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
         [_imageView.layer setContentsGravity:kCAGravityResizeAspectFill];
@@ -184,26 +188,26 @@
     [self.imageView setImage:png];
 }
 
-- (NSLabel *)evolvingString {
-    if (!_evolvingString) {
-        _evolvingString = [[NSLabel alloc] initWithFrame:NSMakeRect(860, 30, 400, 30)];
-        [_evolvingString.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
-        [_evolvingString setTextColor:[NSColor blackColor]];
-        [_evolvingString setFontSize:20];
-        [self.view addSubview:_evolvingString];
+- (NSLabel *)evolvingStringLabel {
+    if (!_evolvingStringLabel) {
+        _evolvingStringLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(860, 230, 400, 30)];
+        [_evolvingStringLabel.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
+        [_evolvingStringLabel setTextColor:[NSColor blackColor]];
+        [_evolvingStringLabel setFontSize:20];
+        [self.view addSubview:_evolvingStringLabel];
     }
-    return _evolvingString;
+    return _evolvingStringLabel;
 }
 
-- (NSLabel *)evolvedString {
-    if (!_evolvedString) {
-        _evolvedString = [[NSLabel alloc] initWithFrame:NSMakeRect(860, 10, 400, 30)];
-        [_evolvedString.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
-        [_evolvedString setTextColor:[NSColor blackColor]];
-        [_evolvedString setFontSize:20];
-        [self.view addSubview:_evolvedString];
+- (NSLabel *)evolvedStringLabel {
+    if (!_evolvedStringLabel) {
+        _evolvedStringLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(860, 210, 400, 30)];
+        [_evolvedStringLabel.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
+        [_evolvedStringLabel setTextColor:[NSColor blackColor]];
+        [_evolvedStringLabel setFontSize:20];
+        [self.view addSubview:_evolvedStringLabel];
     }
-    return _evolvedString;
+    return _evolvedStringLabel;
 }
 
 

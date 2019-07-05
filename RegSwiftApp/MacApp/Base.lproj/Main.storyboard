@@ -706,7 +706,7 @@
             <objects>
                 <viewController id="XfG-lQ-9wD" customClass="MyMainController" sceneMemberID="viewController">
                     <view key="view" id="m2S-Jp-Qdl">
-                        <rect key="frame" x="0.0" y="0.0" width="1280" height="960"/>
+                        <rect key="frame" x="0.0" y="0.0" width="1480" height="960"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </view>
                 </viewController>
