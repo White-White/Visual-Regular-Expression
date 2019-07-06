@@ -166,7 +166,6 @@ class Parser {
         self.lexemes = lexemes
     }
     
-    //
     private func nextLexeme() -> Lexeme? {
         guard currentIndex < self.lexemes.count else { return nil }
         let targetIndex = currentIndex
@@ -174,23 +173,9 @@ class Parser {
         return self.lexemes[targetIndex]
     }
     
-    //helper
-//    static func isLexemesEqual(_ l: Lexeme, r: Lexeme) -> Bool {
-//        switch (l.lexemeType, r.lexemeType) {
-//        case (LexemeType.Literal, LexemeType.Literal):
-//            guard let l = l as? LiteralLexeme, let r = r as? LiteralLexeme else { return false }
-//            return l.value == r.value
-//        case (LexemeType.Functional, LexemeType.Functional):
-//            guard let l = l as? FunctionalLexeme, let r = r as? FunctionalLexeme else { return false }
-//            return l.subType == r.subType
-//        default:
-//            return false
-//        }
-//    }
-    
     static func createLiteralsBetween(startLiteralLexeme: LiteralLexeme, endLiteralLexeme: LiteralLexeme) throws -> [Character] {
         
-        guard let asciiStart = startLiteralLexeme.value.asciiValue, let asciiEnd = endLiteralLexeme.value.asciiValue else { throw RegExSwiftError("SyntaxErrorInClass: Both side of the hyphen must be a valid ascii value") }
+        guard let asciiStart = startLiteralLexeme.value.asciiValue, let asciiEnd = endLiteralLexeme.value.asciiValue else { throw RegExSwiftError.fromType(RegExSwiftErrorType.hyphenSematic) }
         
         let numZero: UInt8 = 48
         let numNine: UInt8 = 57
@@ -215,7 +200,7 @@ class Parser {
         if isNum || isLetterLower || isLetterUpper {
             return (smaller...bigger).map { Character(Unicode.Scalar($0)) }
         } else {
-            throw RegExSwiftError("SyntaxErrorInClass: Values between the hyphen are not semantically  sequenced values")
+            throw RegExSwiftError.fromType(RegExSwiftErrorType.hyphenSematic)
         }
     }
 }

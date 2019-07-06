@@ -25,7 +25,8 @@ public class MatchStatusDesp: NSObject {
 
     var doEmptyInput = true
     var isFirstRun = true
-    var matchString: String
+    var matchString: String!
+    
     var evolve: [BaseState] {
         set {
             self.p_evolve.forEach({ $0.styleType = .Normal })
@@ -36,8 +37,8 @@ public class MatchStatusDesp: NSObject {
                 self.matchStatus = .MatchFail
             } else if newValue.contains(where: { $0.isAcceptingState }) {
                 self.matchStatus = .MatchSuccess
-                let uptoIndex = String.Index.init(utf16Offset: self.indexForNextInput, in: self.matchString)
-                let successMatch = self.matchString.prefix(upTo: uptoIndex)
+                let uptoIndex = String.Index.init(utf16Offset: self.indexForNextInput, in: self.matchString!)
+                let successMatch = self.matchString!.prefix(upTo: uptoIndex)
                 self.successedMatch.append(String(successMatch))
             } else {
                 self.matchStatus = .MatchNormal
@@ -49,9 +50,8 @@ public class MatchStatusDesp: NSObject {
     }
     private var p_evolve: [BaseState]
     
-    init(_ e: [BaseState], match: String) {
+    init(_ e: [BaseState]) {
         self.p_evolve = e
-        self.matchString = match
     }
 }
 
@@ -60,15 +60,14 @@ public class RegSwift: NSObject {
     private let startState: BaseState
     private let entryNFA: BaseNFA
     private let patternString: String
-    private let matchString: String
+    private var matchString: String!
     
     @objc public
     let matchStatusDesp: MatchStatusDesp
     
-    @objc
-    public init(pattern: String, match: String) throws {
+    @objc public
+    init(pattern: String) throws {
         self.patternString = pattern
-        self.matchString = match
         let lexer = Lexer(pattern: pattern)
         let lexemes = try lexer.createLexemes()
         let parser = try Parser(lexemes: lexemes)
@@ -77,8 +76,18 @@ public class RegSwift: NSObject {
         self.startState = DumbState()
         self.startState.styleType = .Highlighted
         self.startState.outs = [self.entryNFA.startState]
-        self.matchStatusDesp = MatchStatusDesp([self.startState], match: self.matchString)
+        self.matchStatusDesp = MatchStatusDesp([self.startState])
         super.init()
+        
+        //reset state name counter
+        BaseState.counter = 0;
+    }
+    
+    @objc public
+    func resetWithMatch(_ m: String) {
+        //has to be done before run
+        self.matchStatusDesp.matchString = m;
+        self.matchString = m;
     }
     
     @objc public func forward() {

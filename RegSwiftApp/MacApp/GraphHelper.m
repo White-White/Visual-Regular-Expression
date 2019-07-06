@@ -15,30 +15,25 @@
     RegSwift *_regSwift;
 }
 
-+ (GraphHelper *)shared {
-    static GraphHelper* instance = nil;
+- (instancetype)init {
+    @throw @"Use initWithRegEx:error:";
+}
+
+- (instancetype)initWithRegEx:(NSString *)regEx error:(NSError *__autoreleasing  _Nullable *)error {
+    self = [super init];
+    
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSURL *librariesDirURL = [[[NSBundle mainBundle] bundleURL] URLByAppendingPathComponent:@"Contents/Frameworks/" isDirectory:YES];
         setenv("GVBINDIR", (char*)[[librariesDirURL path] UTF8String], 1);
-        instance = [[GraphHelper alloc] initPrivate];
     });
     
-    return instance;
-}
-
-- (instancetype)init {
-    @throw @"User [GraphHelper shared]";
-}
-
-- (instancetype)initPrivate {
-    self = [super init];
+    _regSwift = [[RegSwift alloc] initWithPattern:regEx error:error];
     return self;
 }
 
-
-- (void)resetWithRegEx:(NSString *)regEx match:(NSString *)match error:(NSError *__autoreleasing  _Nullable *)error {
-    _regSwift = [[RegSwift alloc] initWithPattern:regEx match:match error:error];
+- (void)resetWithMatch:(NSString *)match {
+    [_regSwift resetWithMatch:match];
 }
 
 - (NSImage *)createPNG {

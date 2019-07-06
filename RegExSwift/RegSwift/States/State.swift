@@ -74,9 +74,16 @@ class BaseState: Hashable {
         }
         
         if let delegate = delegate,
-            let conditionalOut = conditionalOut,
-            delegate.canStateGotoConditionalOutForNothing(self) {
-            ret.append(contentsOf: conditionalOut.outsForNothing(includeSelf: true))
+            let conditionalOut = conditionalOut {
+            
+            let (canGo, canGoRecursive) = delegate.canStateGotoConditionalOutForNothing(self);
+            if canGo {
+                if canGoRecursive {
+                    ret.append(contentsOf: conditionalOut.outsForNothing(includeSelf: true))
+                } else {
+                    ret.append(conditionalOut)
+                }
+            }
         }
         return ret
     }
@@ -106,7 +113,7 @@ class BaseState: Hashable {
 }
 
 protocol ConditionalOutDelegate: AnyObject {
-    func canStateGotoConditionalOutForNothing(_ s: BaseState) -> Bool
+    func canStateGotoConditionalOutForNothing(_ s: BaseState) -> (canGo: Bool, canGoRecursive: Bool)
 }
 
 class DumbState: BaseState {

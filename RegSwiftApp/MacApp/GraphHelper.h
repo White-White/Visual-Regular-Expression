@@ -13,14 +13,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface GraphHelper : NSObject
 
-+ (GraphHelper *)shared;
-
-- (void)resetWithRegEx: (NSString *)regEx
-                 match: (NSString *)match
-                 error: (NSError * _Nullable __autoreleasing *)error;
-
+- (instancetype)initWithRegEx: (NSString *)regEx error: (NSError * _Nullable __autoreleasing *)error;
+- (void)resetWithMatch: (NSString *)match;
 - (NSImage *)createPNG;
 
+//
 - (void)forward;
 - (MatchStatusDesp *)matchStatus;
 

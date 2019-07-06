@@ -84,11 +84,12 @@ class RepeatNFA: BaseNFA {
 }
 
 extension RepeatNFA: ConditionalOutDelegate {
-    func canStateGotoConditionalOutForNothing(_ s: BaseState) -> Bool {
+    
+    func canStateGotoConditionalOutForNothing(_ s: BaseState) -> (canGo: Bool, canGoRecursive: Bool) {
         if self.startState === s {
-            return !self.repeatChecker.needRepeat()
+            return (!self.repeatChecker.needRepeat(), true)
         } else {
-            return self.repeatChecker.canRepeat()
+            return (self.repeatChecker.canRepeat(), false)
         }
     }
 }
