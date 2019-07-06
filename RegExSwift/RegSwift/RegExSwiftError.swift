@@ -8,7 +8,7 @@
 
 import Foundation
 
-public enum RegExSwiftErrorType {
+enum RegExSwiftErrorType {
     
     //lexer
     case LastCharEscape
@@ -25,35 +25,32 @@ public enum RegExSwiftErrorType {
     case invaludOperandAroundAlternation
 }
 
-public class RegExSwiftError: CustomNSError {
+class RegExSwiftError: LocalizedError {
     let reason: String
-    init(_ r: String, code: Int) {
-        self.reason = r + "ErrCode: \(code)"
-    }
+    init(_ r: String) { self.reason = r }
     
-    public static var errorDomain: String { return "RegExSwift" }
-    public var errorCode: Int { return -1 }
-    public var errorUserInfo: [String : Any] { return [:] }
-    public var localizedDescription: String { return self.reason }
+    public var errorDescription: String? {
+        return self.reason
+    }
     
     public static func fromType(_ type: RegExSwiftErrorType) -> RegExSwiftError {
         switch type {
         case .LastCharEscape:
-            return RegExSwiftError("Dangling backslash.", code: 1001)
+            return RegExSwiftError("Dangling backslash")
         case .illegalEscape(let c):
-            return RegExSwiftError("\(c) cant be escaped.", code: 1002)
+            return RegExSwiftError("\(c) cant be escaped")
         case .hyphenSematic:
-            return RegExSwiftError("ClassSyntaxError: Invalid symbol between the hyphen", code: 1003)
+            return RegExSwiftError("ClassSyntaxError: Invalid symbol between the hyphen")
         case .unexpectedSymbol(let c):
-            return RegExSwiftError("Unexpected symbol: \(c)", code: 1004)
+            return RegExSwiftError("Unexpected symbol: \(c)")
         case .unmatchedClassSymbol:
-            return RegExSwiftError("number of [ and ] not matched", code: 1005)
+            return RegExSwiftError("number of [ and ] not matched")
         case .syntaxErrorInCurly:
-            return RegExSwiftError("Syntax error in curly", code: 1006)
+            return RegExSwiftError("Syntax error in curly")
         case .invalidOperand(let s, let isL):
-            return RegExSwiftError("Symbol at \(isL ? "left" : "right") side of \(s) is invalid.", code: 1007)
+            return RegExSwiftError("Invalid symbol at \(isL ? "left" : "right") side of \(s)")
         case .invaludOperandAroundAlternation:
-            return RegExSwiftError("Symbols around | are invalid.", code: 1008)
+            return RegExSwiftError("Symbols around | are invalid")
         }
     }
 }

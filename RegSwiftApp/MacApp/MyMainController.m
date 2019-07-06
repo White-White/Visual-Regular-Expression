@@ -10,17 +10,18 @@
 #import "NSLabel.h"
 #import "GraphHelper.h"
 
-@interface MyMainController () <NSTextFieldDelegate>
+@interface MyMainController () <NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate>
 
 @end
 
 @implementation MyMainController {
-    NSLabel *_errorLabel;
+    NSMutableArray *_logs;
     NSImageView *_imageView;;
     NSLabel *_evolvingStringLabel;
     NSTextField *_regInpuArea;
     NSTextField *_matchInputArea;
     NSButton *_evolveButton;
+    NSTableView *_logsTableView;
     
     GraphHelper *_graphHelper;
 }
@@ -28,6 +29,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.preferredContentSize = NSMakeSize(1200, 800);
+    _logs = [NSMutableArray array];
+    
     NSLabel *regLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(12, 100, 40, 20)];
     regLabel.maximumNumberOfLines = 1;
     [regLabel setText:@"Regular expression: "];
@@ -56,17 +59,17 @@
     _evolveButton.enabled = NO;
     [self.view addSubview:_evolveButton];
     
+    NSButton *resetButton = [[NSButton alloc] initWithFrame:NSMakeRect(442, 18, 80, 30)];
+    [resetButton setTitle:@"Reset"];
+    resetButton.target = self;
+    resetButton.action = @selector(reset);
+    [self.view addSubview:resetButton];
+    
     NSLabel *matchedLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(12, 22, 40, 20)];
     matchedLabel.maximumNumberOfLines = 1;
     [matchedLabel setText:@"Content matched: "];
     [matchedLabel sizeToFit];
     [self.view addSubview:matchedLabel];
-    
-    _errorLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(550, 90, 400, 18)];
-    [_errorLabel.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
-    [_errorLabel setTextColor:[NSColor redColor]];
-    _errorLabel.hidden = YES;
-    [self.view addSubview:_errorLabel];
     
     _evolvingStringLabel = [[NSLabel alloc] initWithFrame:NSMakeRect(regLabel.frame.size.width + 12, 20, 200, 20)];
     [_evolvingStringLabel.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
@@ -79,15 +82,35 @@
     [_imageView.layer setBackgroundColor:[[NSColor lightGrayColor] CGColor]];
     [_imageView.layer setContentsGravity:kCAGravityResizeAspectFill];
     [self.view addSubview:_imageView];
+    
+    NSScrollView * scrollView = [[NSScrollView alloc] init];
+    scrollView.frame = CGRectMake(350, 60, 800, 70);
+    [self.view addSubview:scrollView];
+    _logsTableView = [[NSTableView alloc] initWithFrame:scrollView.bounds];
+    _logsTableView.dataSource = self;
+    _logsTableView.delegate = self;
+    [_logsTableView setHeaderView:nil];
+    NSTableColumn * column = [[NSTableColumn alloc]initWithIdentifier:@"OK"];
+    [column setWidth:scrollView.frame.size.width];
+    [_logsTableView addTableColumn:column];
+    scrollView.documentView = _logsTableView;
 }
 
-- (void)viewDidAppear {
-    [super viewDidAppear];
+- (void)reset {
+    _graphHelper = nil;
+    _regInpuArea.stringValue = @"";
+    _matchInputArea.stringValue = @"";
+    _matchInputArea.enabled = NO;
+    _evolveButton.enabled = NO;
+    _evolvingStringLabel.stringValue = @"";
+    [_logs removeAllObjects];
+    [_logsTableView reloadData];
+    [_imageView setImage:nil];
 }
 
 - (void)didClickEvolveButton {
     if (!_graphHelper) {
-        [self showError:@"Please create one NFA first."];
+        [self addErrorLog:@"Please create one NFA first."];
         return;
     }
     
@@ -96,8 +119,40 @@
     
     //check status
     MatchStatusDesp *matchStatus = [_graphHelper matchStatus];
-    [self showError:matchStatus.log];
+    NSArray *logs = [matchStatus extractLogsAndClear];
+    NSEnumerator *logEnume = logs.objectEnumerator;
+    NSString *firstLog = logEnume.nextObject;
+    if (firstLog) { [self addLog:firstLog]; }
     
+    NSColor *nextLogColor;
+    switch (matchStatus.matchStatus) {
+        case MatchStatusMatchEnd:
+            _evolveButton.enabled = NO;
+            nextLogColor = [NSColor orangeColor];
+            break;
+        case MatchStatusMatchFail:
+            _evolveButton.enabled = NO;
+            nextLogColor = [NSColor redColor];
+            break;
+        case MatchStatusMatchStart:
+            nextLogColor = [NSColor blackColor];
+            break;
+        case MatchStatusMatchNormal:
+            nextLogColor = [NSColor blackColor];
+            break;
+        case MatchStatusMatchSuccess:
+            nextLogColor = [NSColor orangeColor];
+            break;
+        default:
+            break;
+    }
+    
+    NSString *nexgLog = [logEnume nextObject];
+    while (nexgLog) {
+        [self addLog:nexgLog color:nextLogColor];
+        nexgLog = [logEnume nextObject];
+    }
+
     //show result
     NSMutableAttributedString *evolvingAttriString = [[NSMutableAttributedString alloc] initWithString:_evolvingStringLabel.text];
     [evolvingAttriString setAttributes:@{NSBackgroundColorAttributeName: [NSColor greenColor]} range:NSMakeRange(0, [matchStatus indexForNextInput])];
@@ -128,27 +183,31 @@
     if (!rg || rg.length == 0) {
         _graphHelper = nil;
         _matchInputArea.enabled = NO;
-        [self showError:@"Rg cant be nil"];
+        [self addErrorLog:@"Regular expression cant be empty"];
         return;
     }
     
-    NSError *error;
+    NSError *error = nil;
     _graphHelper = [[GraphHelper alloc] initWithRegEx:rg error:&error];
     if (error) {
         _graphHelper = nil;
         _matchInputArea.enabled = NO;
-        [self showError:[error localizedDescription]];
+        [self addErrorLog:[error localizedDescription]];
         return;
     } else {
         _matchInputArea.enabled = YES;
+        [self addLog:[@"Valid regular expression. " stringByAppendingString:rg]];
         [self updateImage];
     }
+    
+    _matchInputArea.stringValue = @"";
+    _evolveButton.enabled = NO;
 }
 
 - (void)updateMatch {
     NSString *match = _matchInputArea.stringValue;
     if (!match) {
-        [self showError:@"Target match string can't be EMPTYYYY!"];
+        [self addErrorLog:@"Target match string can't be EMPTYYYY!"];
         _evolveButton.enabled = NO;
         return;
     }
@@ -169,9 +228,36 @@
     [_graphHelper resetWithMatch:match];
 }
 
-- (void)showError: (NSString *)error {
-    [_errorLabel setText:error];
-    _errorLabel.hidden = NO;
+- (void)addErrorLog: (NSString *)error {
+    [self addLog:error color:[NSColor redColor]];
+}
+
+- (void)addLog: (NSString *)log {
+    [self addLog:log color:[NSColor blackColor]];
+}
+
+- (void)addSuccessLog: (NSString *)log {
+    [self addLog:log color:[NSColor orangeColor]];
+}
+
+- (void)addLog: (NSString *)log color: (NSColor *)color {
+    [_logs addObject:@{@"content": log, @"color": color}];
+    [_logsTableView reloadData];
+    [_logsTableView scrollToEndOfDocument:nil];
+}
+
+//MARK: - tableview datasource
+
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView {
+    return _logs.count;
+}
+
+-(id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+    return [NSString stringWithFormat:@"[log:%ld] -- %@", (long)row, [_logs[row] objectForKey:@"content"]];
+}
+
+- (void)tableView:(NSTableView *)tableView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
+    [cell setTextColor: [_logs[row] objectForKey:@"color"]];
 }
 
 @end
