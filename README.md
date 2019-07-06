@@ -26,7 +26,7 @@ clone this repo to your folder.
 
 open RegSwiftProject.xcworkspace with Xcode.
 
-Run MacApp target.
+run MacApp target.
 
 ## Authors
 
@@ -39,6 +39,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 * I learned these shits from [The Dragon Book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools)
-* This project is heavily inpired the work of [Russ Cox](https://swtch.com/~rsc/). One lost soul (like me) can find some great articles about regular expression from [Regular Expression Matching Can Be Simple And Fast](https://swtch.com/~rsc/regexp/regexp1.html)
-* This project is a good example of using [Graphviz](https://www.graphviz.org/) as a c-library in your project. Many thanks to people behind Graphviz.
+* This project is heavily inpired by the work of [Russ Cox](https://swtch.com/~rsc/). One lost soul (like me) can find some great articles about regular expression from [Regular Expression Matching Can Be Simple And Fast](https://swtch.com/~rsc/regexp/regexp1.html)
+* This project is also a good example of using [Graphviz](https://www.graphviz.org/) as a c-library in your project. Many thanks to people behind Graphviz.
 
