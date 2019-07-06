@@ -16,6 +16,7 @@ enum LiteralsClassType {
 struct LiteralsClass {
     let type: LiteralsClassType
     let characters: Set<Character>
+    let acceptanceDesp: String
     
     /*
      https://www.vogella.com/tutorials/JavaRegularExpressions/article.html
@@ -36,6 +37,7 @@ struct LiteralsClass {
     init(type: LiteralsClassType, characters: Set<Character>) {
         self.type = type
         self.characters = characters
+        self.acceptanceDesp = String(Array(characters))
     }
     
     init?(fromPreset c: Character) {
@@ -43,21 +45,27 @@ struct LiteralsClass {
         case "d":  //Any digit, short for [0-9]
             self.type = .Include
             self.characters = LiteralsClass.digits
+            self.acceptanceDesp = "0-9"
         case "D":  //A non-digit, short for [^0-9]
             self.type = .Exclude
             self.characters = LiteralsClass.digits
+            self.acceptanceDesp = "!0-9"
         case "s": //A whitespace character, short for [ \t\n\x0b\r\f]
             self.type = .Include
             self.characters = LiteralsClass.whiteSpaces
+            self.acceptanceDesp = "space"
         case "S":
             self.type = .Exclude
             self.characters = LiteralsClass.whiteSpaces
+            self.acceptanceDesp = "!space"
         case "w":
             self.type = .Include
             self.characters = LiteralsClass.digits.union(LiteralsClass.letters).union(LiteralsClass.lettersUpper)
+            self.acceptanceDesp = "[A-z]"
         case "W":
             self.type = .Exclude
             self.characters = LiteralsClass.digits.union(LiteralsClass.letters).union(LiteralsClass.lettersUpper)
+            self.acceptanceDesp = "![A-z]"
 //        case "b":
 //        case "S+"
         default:
@@ -72,10 +80,5 @@ struct LiteralsClass {
         case .Exclude:
             return !self.characters.contains(character)
         }
-    }
-    
-    func criteriaDesp() -> String {
-        let criteria = (Array(self.characters).map { String($0) }).joined(separator: ",")
-        return String.init(format: "\(self.type == .Exclude ? "!" : "")%@", criteria)
     }
 }

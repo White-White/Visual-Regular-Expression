@@ -130,7 +130,7 @@ class LiteralState: BaseState {
     init(literalClass: LiteralsClass) {
         self.literalClass = literalClass
         super.init()
-        self.acceptanceDesp = literalClass.criteriaDesp()
+        self.acceptanceDesp = literalClass.acceptanceDesp
     }
     
     override func canAcceptNothing() -> Bool {
