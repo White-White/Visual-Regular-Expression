@@ -1,24 +1,40 @@
-# RegExSwift
-
-RegExSwft converts your regular expression to a NFA, and shows you how regular expression matching is done and what the heck is going on behind this matching magic with a dynamic graph.
 
 ![](example.gif)
 
 **Why this project:**
-When I was reading [The Dragon Book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools), I found concepts like NFA/DFA difficult to understand. However, as the foundation of regular expression, NFA is an important shit in computer science. There is no better way to study one thing than make it all over again.
+When I was reading [The Dragon Book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools), I found concepts like NFA/DFA and regular expression are fundamental to computer science. However, they are difficult to understand, especially the part NFA simulating DNA to achieve regular expression matching is too abstract. At that time, it was of a great help if there were a tool to visually reveal the principles behinds those concepts. 
 
-Besides, I believe RegExSwift is a good tool for anyone struggling to understand regular expression and how it works.
+There are already some great implementations online which converts regular expressions to railway graph. But those implementations lack the feature to show state transitions, which is a major feature of RegExSwift.
 
-**Details:**
-RegExSwift parses regular expression with its own parsing engine written in Swift. Then it creates NFAs with the parsing result. Finally, it renders the NFAs to png with Graphviz.
+I believe RegExSwift is an efficient tool to learn NFA and regular expressions.
 
-**HeadsUp:**
-This is a toy project. Compared to other engines in release, its regular expression parsing implementation is incomplete if not slow.
+**为什么写这个项目:**
+在我阅读[龙书](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools)的过程中，我意识到NFA和正则表达式是计算机科学很重要的根基。
+然而，我发现NFA的概念很难理解，尤其是NFA模拟DNF已达成正则匹配的部分，更是太过抽象。如果能有一个工具以视觉的方式向我展示这一过程，我一定会更好地理解NFA和正则。
+
+网上已有一些优秀的实现将正则表达式转化成铁路图，但它们缺乏动态展示状态流转的过程，而RegExSwift正补上了这一环。
+
+我相信RegExSwift是一个帮助学习NFA和正则的高效工具。
+
+## Acknowledgments
+
 1. No greedy mode
-2. Its grammar is more strictive. For example, any thing between "[]" is considered literal except "-", which must be escaped if a literal "-" is to be matched.
+2. Its grammar is more strict. For example, any thing between "[]" is considered literal except "-", which must be escaped if a literal "-" is to be matched.
 3. If there is any syntax error, make sure your pattern string is valid for https://regexr.com/
 4. Please let me know if this app is letting your down in any way. jinhao.zhang@icloud.com
+5. I learned these shits from [The Dragon Book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools)
+6. This project is heavily inpired by the work of [Russ Cox](https://swtch.com/~rsc/). One lost soul (like me) can find some great articles about regular expression from [Regular Expression Matching Can Be Simple And Fast](https://swtch.com/~rsc/regexp/regexp1.html)
+7. This project is also a good example of using [Graphviz](https://www.graphviz.org/) as a c-library in your project. Many thanks to people behind Graphviz.
 
+## 声明
+
+1. 不支持贪婪模式
+2. RegExSwift的正则语法更严格。比如，[]中间的特殊符号仅支持‘-’
+3. 如果你收到任何语言错误的提示，可以前往 https://regexr.com/ 验证你的输入
+4. 对此repo有任何问题，欢迎联系我jinhao.zhang@icloud.com
+5. 我从龙书中学习到所有这些知识 [The Dragon Book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools)
+6. 这个项目的很多启发来源于 [Russ Cox](https://swtch.com/~rsc/) 的优秀工作结果。若有人对正则表达式方面有疑问，你都可以在这里找到很多有帮助的资料 [Regular Expression Matching Can Be Simple And Fast](https://swtch.com/~rsc/regexp/regexp1.html)
+7. 本项目也是一个使用 [Graphviz](https://www.graphviz.org/) 作为C库的实现案例。向维护 Graphviz 的人致敬与感谢
 
 ## Getting Started
 
@@ -28,6 +44,14 @@ open RegSwiftProject.xcworkspace with Xcode.
 
 run MacApp target.
 
+## 使用方式
+
+将本repo clone到你本地的文件夹
+
+使用Xcode打开 RegSwiftProject.xcworkspace 工程
+
+运行MacApp
+
 ## Authors
 
 *Initial work* - [White](https://github.com/White-White)  email: jinhao.zhang@icloud.com
@@ -35,10 +59,4 @@ run MacApp target.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
-## Acknowledgments
-
-* I learned these shits from [The Dragon Book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools)
-* This project is heavily inpired by the work of [Russ Cox](https://swtch.com/~rsc/). One lost soul (like me) can find some great articles about regular expression from [Regular Expression Matching Can Be Simple And Fast](https://swtch.com/~rsc/regexp/regexp1.html)
-* This project is also a good example of using [Graphviz](https://www.graphviz.org/) as a c-library in your project. Many thanks to people behind Graphviz.
 
