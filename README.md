@@ -4,17 +4,17 @@
 **Why this project:**
 When I was reading [The Dragon Book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools), I found concepts like NFA/DFA and regular expression are fundamental to computer science. However, they are difficult to understand, especially the part NFA simulating DNA to achieve regular expression matching is too abstract. At that time, it was of a great help if there were a tool to visually reveal the principles behinds those concepts. 
 
-There are already some great implementations online which converts regular expressions to railway graph. For example: https://regexper.com/ But those implementations lack the feature to show state transitions, which is a major feature of RegExSwift.
+There are already some great implementations online which converts regular expressions to railway graph. For example: https://regexper.com/ But those implementations lack the feature to show state transitions, which is a major feature of Visual-Regular-Expression.
 
-I believe RegExSwift is an efficient tool to learn NFA and regular expressions.
+I believe Visual-Regular-Expression is an efficient tool to learn NFA and regular expressions.
 
 **为什么写这个项目:**
 在我阅读[龙书](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools)的过程中，我意识到NFA和正则表达式是计算机科学很重要的根基。
 然而，我发现NFA的概念很难理解，尤其是NFA模拟DNF已达成正则匹配的部分，更是太过抽象。如果能有一个工具以视觉的方式向我展示这一过程，我一定会更好地理解NFA和正则。
 
-网上已有一些优秀的实现将正则表达式转化成铁路图，例如 https://regexper.com/ 但它们缺乏动态展示状态流转的过程，而RegExSwift正补上了这一环。
+网上已有一些优秀的实现将正则表达式转化成铁路图，例如 https://regexper.com/ 但它们缺乏动态展示状态流转的过程，而Visual-Regular-Expression正补上了这一环。
 
-我相信RegExSwift是一个帮助学习NFA和正则的高效工具。
+我相信Visual-Regular-Expression是一个帮助学习NFA和正则的高效工具。
 
 ## Acknowledgments
 
@@ -29,7 +29,7 @@ I believe RegExSwift is an efficient tool to learn NFA and regular expressions.
 ## 声明
 
 1. 不支持贪婪模式
-2. RegExSwift的正则语法更严格。比如，[]中间的特殊符号仅支持‘-’
+2. Visual-Regular-Expression的正则语法更严格。比如，[]中间的特殊符号仅支持‘-’
 3. 如果你收到任何语言错误的提示，可以前往 https://regexr.com/ 验证你的输入
 4. 对此repo有任何问题，欢迎联系我jinhao.zhang@icloud.com
 5. 我从龙书中学习到所有这些知识 [The Dragon Book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools)
