@@ -12,7 +12,7 @@ I believe Visual-Regular-Expression is an efficient tool to learn NFA and regula
 在我阅读[龙书](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools)的过程中，我意识到NFA和正则表达式是计算机科学很重要的根基。
 然而，我发现NFA的概念很难理解，尤其是NFA模拟DNF已达成正则匹配的部分，更是太过抽象。如果能有一个工具以视觉的方式向我展示这一过程，我一定会更好地理解NFA和正则。
 
-网上已有一些优秀的实现将正则表达式转化成铁路图，例如 https://regexper.com/ 但它们缺乏动态展示状态流转的过程，而Visual-Regular-Expression正补上了这一环。本项目使用Swift的正则解析引擎，将解析结果转换成NFA，并动态展示每一步的匹配过程。
+网上已有一些优秀的实现将正则表达式转化成铁路图，例如 https://regexper.com/ 但它们缺乏动态展示状态流转的过程，而Visual-Regular-Expression正补上了这一环。本项目使用一个swift实现的正则解析引擎，将解析结果转换成NFA，并动态展示每一步的匹配过程。
 
 我相信Visual-Regular-Expression是一个帮助学习NFA和正则的高效工具。
 
