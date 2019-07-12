@@ -1,14 +1,14 @@
 
 ![](example.gif)
 
-**Why this project:**
+## Why this project:
 When I was reading [The Dragon Book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools), I found concepts like NFA/DFA and regular expression are fundamental to computer science. However, they are difficult to understand, especially the part NFA simulating DNA to achieve regular expression matching is too abstract. At that time, it was of a great help if there were a tool to visually reveal the principles behinds those concepts. 
 
 There are already some great implementations online which converts regular expressions to railway graph. For example: https://regexper.com/ But those implementations lack the feature to show state transitions, which is a major feature of Visual-Regular-Expression.
 
 I believe Visual-Regular-Expression is an efficient tool to learn NFA and regular expressions.
 
-**为什么写这个项目:**
+## 为什么写这个项目:
 在我阅读[龙书](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools)的过程中，我意识到NFA和正则表达式是计算机科学很重要的根基。
 然而，我发现NFA的概念很难理解，尤其是NFA模拟DNF已达成正则匹配的部分，更是太过抽象。如果能有一个工具以视觉的方式向我展示这一过程，我一定会更好地理解NFA和正则。
 
