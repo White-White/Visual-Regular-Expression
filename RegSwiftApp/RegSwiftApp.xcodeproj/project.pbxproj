@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1F5DCB6122A95FBC008ECC24 /* GVApplicationDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F5DCB6022A95FBC008ECC24 /* GVApplicationDelegate.m */; };
 		1F5DCB7A22AA4B8B008ECC24 /* RegExSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F5DCB7922AA4B8B008ECC24 /* RegExSwift.framework */; };
 		1F5DCB7B22AA4B8B008ECC24 /* RegExSwift.framework in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1F5DCB7922AA4B8B008ECC24 /* RegExSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1F657A0422B37EAB0027275D /* MyMainController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F657A0322B37EAB0027275D /* MyMainController.m */; };
@@ -15,15 +14,6 @@
 		1F657A0A22B385620027275D /* GraphHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F657A0922B385620027275D /* GraphHelper.m */; };
 		1F77618922A8FC1600400878 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77618822A8FC1600400878 /* AppDelegate.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1F77619122A8FC1800400878 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77619022A8FC1800400878 /* main.m */; };
-		1F7761A322A8FC2D00400878 /* GVAttributeInspectorController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77614522A8F84900400878 /* GVAttributeInspectorController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		1F7761A422A8FC2D00400878 /* GVAttributeSchema.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77614D22A8F84A00400878 /* GVAttributeSchema.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		1F7761A522A8FC2D00400878 /* GVDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77613C22A8F84900400878 /* GVDocument.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		1F7761A622A8FC2D00400878 /* GVExportViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77614B22A8F84A00400878 /* GVExportViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		1F7761A722A8FC2D00400878 /* GVFileNotificationCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77613E22A8F84900400878 /* GVFileNotificationCenter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		1F7761A822A8FC2D00400878 /* GVGraph.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77613D22A8F84900400878 /* GVGraph.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		1F7761A922A8FC2D00400878 /* GVGraphArguments.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77614022A8F84900400878 /* GVGraphArguments.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		1F7761AA22A8FC2D00400878 /* GVGraphDefaultAttributes.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77614822A8F84A00400878 /* GVGraphDefaultAttributes.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		1F7761AB22A8FC2D00400878 /* GVWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F77614A22A8F84A00400878 /* GVWindowController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1F7761B422A9007300400878 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F77618A22A8FC1800400878 /* Assets.xcassets */; };
 		1F7761B522A9008200400878 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1F77618C22A8FC1800400878 /* Main.storyboard */; };
 		1F7761B622A9008400400878 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1F77618F22A8FC1800400878 /* Info.plist */; };
@@ -83,8 +73,6 @@
 
 /* Begin PBXFileReference section */
 		1F06F80922A7627A00A0E563 /* RegSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RegSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		1F5DCB5F22A95FBB008ECC24 /* GVApplicationDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GVApplicationDelegate.h; sourceTree = "<group>"; };
-		1F5DCB6022A95FBC008ECC24 /* GVApplicationDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVApplicationDelegate.m; sourceTree = "<group>"; };
 		1F5DCB6222AA49DC008ECC24 /* RegSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RegSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F5DCB7922AA4B8B008ECC24 /* RegExSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RegExSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F657A0222B37EAB0027275D /* MyMainController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyMainController.h; sourceTree = "<group>"; };
@@ -146,24 +134,6 @@
 		1F77613822A8F80C00400878 /* const.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = const.h; sourceTree = "<group>"; };
 		1F77613922A8F80C00400878 /* render.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = render.h; sourceTree = "<group>"; };
 		1F77613A22A8F80C00400878 /* geom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geom.h; sourceTree = "<group>"; };
-		1F77613C22A8F84900400878 /* GVDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVDocument.m; sourceTree = "<group>"; };
-		1F77613D22A8F84900400878 /* GVGraph.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVGraph.m; sourceTree = "<group>"; };
-		1F77613E22A8F84900400878 /* GVFileNotificationCenter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVFileNotificationCenter.m; sourceTree = "<group>"; };
-		1F77613F22A8F84900400878 /* GVExportViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GVExportViewController.h; sourceTree = "<group>"; };
-		1F77614022A8F84900400878 /* GVGraphArguments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVGraphArguments.m; sourceTree = "<group>"; };
-		1F77614122A8F84900400878 /* GVAttributeInspectorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GVAttributeInspectorController.h; sourceTree = "<group>"; };
-		1F77614422A8F84900400878 /* GVAttributeSchema.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GVAttributeSchema.h; sourceTree = "<group>"; };
-		1F77614522A8F84900400878 /* GVAttributeInspectorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVAttributeInspectorController.m; sourceTree = "<group>"; };
-		1F77614622A8F84A00400878 /* GVGraphDefaultAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GVGraphDefaultAttributes.h; sourceTree = "<group>"; };
-		1F77614722A8F84A00400878 /* GVGraphArguments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GVGraphArguments.h; sourceTree = "<group>"; };
-		1F77614822A8F84A00400878 /* GVGraphDefaultAttributes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVGraphDefaultAttributes.m; sourceTree = "<group>"; };
-		1F77614922A8F84A00400878 /* GVFileNotificationCenter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GVFileNotificationCenter.h; sourceTree = "<group>"; };
-		1F77614A22A8F84A00400878 /* GVWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVWindowController.m; sourceTree = "<group>"; };
-		1F77614B22A8F84A00400878 /* GVExportViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVExportViewController.m; sourceTree = "<group>"; };
-		1F77614C22A8F84A00400878 /* GVGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GVGraph.h; sourceTree = "<group>"; };
-		1F77614D22A8F84A00400878 /* GVAttributeSchema.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GVAttributeSchema.m; sourceTree = "<group>"; };
-		1F77614E22A8F84A00400878 /* GVDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GVDocument.h; sourceTree = "<group>"; };
-		1F77614F22A8F84A00400878 /* GVWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GVWindowController.h; sourceTree = "<group>"; };
 		1F77618522A8FC1600400878 /* MacApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F77618722A8FC1600400878 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1F77618822A8FC1600400878 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -369,26 +339,6 @@
 			isa = PBXGroup;
 			children = (
 				1F7761AC22A8FCC300400878 /* Prefix.h */,
-				1F5DCB5F22A95FBB008ECC24 /* GVApplicationDelegate.h */,
-				1F5DCB6022A95FBC008ECC24 /* GVApplicationDelegate.m */,
-				1F77614122A8F84900400878 /* GVAttributeInspectorController.h */,
-				1F77614522A8F84900400878 /* GVAttributeInspectorController.m */,
-				1F77614422A8F84900400878 /* GVAttributeSchema.h */,
-				1F77614D22A8F84A00400878 /* GVAttributeSchema.m */,
-				1F77614E22A8F84A00400878 /* GVDocument.h */,
-				1F77613C22A8F84900400878 /* GVDocument.m */,
-				1F77613F22A8F84900400878 /* GVExportViewController.h */,
-				1F77614B22A8F84A00400878 /* GVExportViewController.m */,
-				1F77614922A8F84A00400878 /* GVFileNotificationCenter.h */,
-				1F77613E22A8F84900400878 /* GVFileNotificationCenter.m */,
-				1F77614C22A8F84A00400878 /* GVGraph.h */,
-				1F77613D22A8F84900400878 /* GVGraph.m */,
-				1F77614722A8F84A00400878 /* GVGraphArguments.h */,
-				1F77614022A8F84900400878 /* GVGraphArguments.m */,
-				1F77614622A8F84A00400878 /* GVGraphDefaultAttributes.h */,
-				1F77614822A8F84A00400878 /* GVGraphDefaultAttributes.m */,
-				1F77614F22A8F84A00400878 /* GVWindowController.h */,
-				1F77614A22A8F84A00400878 /* GVWindowController.m */,
 			);
 			path = OCLayer;
 			sourceTree = "<group>";
@@ -520,17 +470,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1F77619122A8FC1800400878 /* main.m in Sources */,
-				1F7761AB22A8FC2D00400878 /* GVWindowController.m in Sources */,
-				1F5DCB6122A95FBC008ECC24 /* GVApplicationDelegate.m in Sources */,
 				1F657A0722B3813E0027275D /* NSLabel.m in Sources */,
-				1F7761A922A8FC2D00400878 /* GVGraphArguments.m in Sources */,
-				1F7761A622A8FC2D00400878 /* GVExportViewController.m in Sources */,
-				1F7761A822A8FC2D00400878 /* GVGraph.m in Sources */,
-				1F7761A722A8FC2D00400878 /* GVFileNotificationCenter.m in Sources */,
-				1F7761A322A8FC2D00400878 /* GVAttributeInspectorController.m in Sources */,
-				1F7761AA22A8FC2D00400878 /* GVGraphDefaultAttributes.m in Sources */,
-				1F7761A522A8FC2D00400878 /* GVDocument.m in Sources */,
-				1F7761A422A8FC2D00400878 /* GVAttributeSchema.m in Sources */,
 				1F657A0422B37EAB0027275D /* MyMainController.m in Sources */,
 				1F77618922A8FC1600400878 /* AppDelegate.m in Sources */,
 				1F657A0A22B385620027275D /* GraphHelper.m in Sources */,
