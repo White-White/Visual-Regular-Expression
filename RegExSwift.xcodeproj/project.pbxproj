@@ -33,7 +33,6 @@
 		1F829DEE22CCE59100FAC713 /* NFA.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NFA.swift; sourceTree = "<group>"; };
 		1F829DF022CCE99A00FAC713 /* NFACreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NFACreator.swift; sourceTree = "<group>"; };
 		1FC3D4B2229FDB4A00151682 /* RepeatChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatChecker.swift; sourceTree = "<group>"; };
-		1FC3D4B522A1164800151682 /* c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = c.c; sourceTree = "<group>"; };
 		1FCE6F2E2297A49300F5A9E8 /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
 		1FCE6F302297E65400F5A9E8 /* RegExSwiftError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegExSwiftError.swift; sourceTree = "<group>"; };
 		1FCE6F322297EFFA00F5A9E8 /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
@@ -71,7 +70,6 @@
 			isa = PBXGroup;
 			children = (
 				1F7649D4229E2B45007478F4 /* RegSwift */,
-				1FC3D4B422A1162F00151682 /* Reference */,
 			);
 			path = RegExSwift;
 			sourceTree = "<group>";
@@ -125,14 +123,6 @@
 				1FC3D4B2229FDB4A00151682 /* RepeatChecker.swift */,
 			);
 			path = States;
-			sourceTree = "<group>";
-		};
-		1FC3D4B422A1162F00151682 /* Reference */ = {
-			isa = PBXGroup;
-			children = (
-				1FC3D4B522A1164800151682 /* c.c */,
-			);
-			path = Reference;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
